@@ -103,11 +103,11 @@ me to grow.
 
     # Aside section
 	[params.aside]
-		headline = "I have a Blog"
+		headline = "I have a CV"
 
 		[params.aside.button]
 			text = "Check it out"
-			link = "//blog.axelmagn.com"
+			link = "//cv.axelmagn.com"
 
 	# Contact section
 	[params.contact]

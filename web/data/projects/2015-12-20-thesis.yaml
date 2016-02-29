@@ -1,0 +1,20 @@
+modalID: thesis
+title: Popularity Prediction on Twitter
+date: 2015-12-20
+img: thesis.jpg
+client: Boise State University
+clientLink: "#"
+category: Data Science
+description:
+    "I completed my Masters thesis in December 2015 on methods for predicting 
+    popular topics on Twitter.  Over the course of two years, I developed this 
+    project from the early phase of exploratory research to a fully realized set
+    of experiments which would evaluate cutting edge topic models such as
+    Supervised LDA for their potential in extracting latent popular topics on
+    Twitter, as well as clustering existing documents according to these topics.
+    In addition to the body of research, I administered the BSU Infolab Hadoop 
+    big data cluster for the duration of my degree (including an installation 
+    from scratch).
+
+    In this project, my primary tools were: *Pylab, Hadoop, Topic Models, 
+    and Monte Carlo Methods*."

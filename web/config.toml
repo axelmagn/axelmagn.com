@@ -1,6 +1,6 @@
 baseurl = "http://replace-this-with-your-hugo-site.com/"
 languageCode = "en-us"
-title = "Hugo Creative Theme"
+title = "Axel Magnuson"
 theme = "creative"
 
 [params]
@@ -20,7 +20,8 @@ theme = "creative"
 	# To provide some metadata for search engines feel free to add a few
     # information about you and your website.
 	name = "Axel Magnuson"
-	description = "Axel Magnuson writes software.  Sometimes the software seems like it's learning.  Maybe one day the software will write its own software, and Axel will be the proud papa."
+	description = "Data Scientist // Web Developer"
+	# description = "Axel Magnuson writes software.  Sometimes the software seems like it's learning.  Maybe one day the software will write its own software, and Axel will be the proud papa."
 
 	# The path must be relative to the static folder
 	favicon = "favicon.ico"
@@ -41,66 +42,76 @@ theme = "creative"
 	[params.hero]
 		# To change the background of the hero section, replace the 'header.jpg' at './static/img' with your own.
 		slogan     = "Axel Magnuson"
-		subtitle   = "I write software.  Sometimes the software seems like it's learning.  Maybe one day the software will write its own software, and I will be the proud papa."
-		buttonText = "Okay..."
+        # in the subtitle, give the "title" of what you're going to tell them.
+        # subtitle = "A One-Stop Shop for Badass Software"
+        subtitle = "Data Scientist // Web Developer"
+		# subtitle   = "I write software.  Sometimes the software seems like it's learning.  Maybe one day the software will write its own software, and I will be the proud papa."
+		buttonText = "Nice to meet you"
 
 
 	# About section
+    # Education, Experience, Projects. Tell them what you're going to tell them.
 	[params.about]
+        # headline = "A One-Stop Shop for Badass Software"
 		headline    = "A Man of At Least a Couple Talents"
 		description = """
-I am a Software Engineer and a Data Scientist.  I build powerful products by
-adhering to the Unix principle of small, sharp tools.  Most of the time these
-are robust backend web services, implementing anything from business logic to
-AI-based event detection.  I specialize in machine learning and big data
-applications, but I have also worked extensively in web development.
-        """
-		# buttonText  = "Get Started!"
+I am a Computer Science M.Sc. with a background in mathematics and four years of
+software development experience. I build powerful data products and web applications 
+by adhering to the Unix principle of small, sharp tools.  
+
+In the past I have worked on popularity prediction for social networks, radar
+object classification and correlation, social network modeling, big data
+processing pipelines, full stack web applications, and microservice
+architectures. Sometimes I take leadership roles. I love working with data and
+software systems, and I am always eager to find exciting projects that challenge
+me to grow.
+"""
+		buttonText  = "Cool"
 
 
 	# Service section
 	[params.services]
-		headline = "At your service"
+		headline = "Things I Do"
 
         [[params.services.list]]
-            icon = "fa-diamond"
-            title = "Machine Learning"
-            description = "Our templates are updated regularly so they don't break."
-
-        [[params.services.list]]
-			icon = "fa-paper-plane"
-			title = "Big Data"
-			description = "You can use this theme as is, or you can make changes!"
+            icon = "fa-graduation-cap"
+            title = "Data Science"
+            description = "From predictive analytics to recommender systems.  Data nerd at your service."
 
 		[[params.services.list]]
-            icon = "fa-newspaper-o"
-            title = "Web Development"
-            description = "We update dependencies to keep things fresh."
+            icon = "fa-wrench"
+            title = "Software Engineering"
+            description = "Sooner or later, you need to create a great product. I can help with that."
 
         [[params.services.list]]
-            icon = "fa-heart"
-            title = "DevOps"
-            description = "You have to make your websites with love these days!"
+			icon = "fa-tachometer"
+			title = "Big Data Solutions"
+			description = "For managing volume, velocity, and variety."
+
+        [[params.services.list]]
+            icon = "fa-cogs"
+            title = "Development Operations"
+            description = "Good engineers need tools that support them."
 
 
     # Portfolio modals
 	[params.portfolio.modal]
         client = "Client"
-        date = "Date"
+        date = "Year"
         category = "Category"
         buttonText = "Close"
 
     # Aside section
 	[params.aside]
-		headline = "Check out My Blog"
+		headline = "I have a Blog"
 
 		[params.aside.button]
-			text = "Download now"
-			link = "//github.com/digitalcraftsman/hugo-creative-theme"
+			text = "Check it out"
+			link = "//blog.axelmagn.com"
 
 	# Contact section
 	[params.contact]
 		headline = "Let's Get In Touch!"
-		description = "Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!"
-		phone = "123-456-6789"
-		email = "feedback@startbootstrap.com"
+		description = "Like what you see?  Drop me a line! I don't bite and I like meeting new people."
+		phone = "+1 (208) 391 3928"
+		email = "axelmagn@gmail.com"

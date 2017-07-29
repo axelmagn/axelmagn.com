@@ -1,0 +1,11 @@
+name: Axel Magnuson
+link: http://www.axelmagn.com
+source: "."
+dest: "build"
+drafts: _drafts
+ignore:
+  - .git/*
+  - Makefile
+  - README.md
+  - build/*
+

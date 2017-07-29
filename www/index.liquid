@@ -1,0 +1,19 @@
+extends: default.liquid
+---
+<div >
+  <h1>Axel Magnuson</h1>
+
+  <ul>
+      <li><a href="https://goo.gl/6T8mgw">GitHub</a></li>
+      <li><a href="https://goo.gl/Gc3t4u">LinkedIn</a></li>
+  </ul>
+
+  <div>
+    {% for post in posts %}
+      <div>
+        <h4>{{post.title}}</h4>
+        <h4><a href="{{post.path}}">{{ post.title }}</a></h4>
+      </div>
+    {% endfor %}
+  </div>
+</div>

@@ -1,5 +1,5 @@
-.PHONY: home
-home:
+.PHONY: all
+all:
 	cobalt build
 
 clean:

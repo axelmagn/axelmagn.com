@@ -26,15 +26,13 @@ apiVersion: networking.k8s.io/v1
 metadata:
   name: git-tls
   namespace: gitea-repo
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   tls:
   - hosts:
     - git.axelmagn.com
     secretName: tls-gitea
   rules:
-  - host: gitea.foo.com
+  - host: git.axelmagn.com
     http:
       paths:
       - path: /

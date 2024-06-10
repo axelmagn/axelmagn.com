@@ -7,10 +7,32 @@ compile_sass = true
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
 
+generate_feed = true
+minify_html = true
+
+theme = "tabi"
+title = "Axel Magnuson Homepage"
+
+taxonomies = [{name = "tags", feed = true}]
+
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
 highlight_code = true
+highlight_theme = "css"
 
 [extra]
 # Put all your custom variables here
+section_path = "blog/_index.md"
+
+menu = [
+    { name = "Blog", url = "blog", trailing_slash = true },
+    { name = "Archive", url = "archive", trailing_slash = true },
+    { name = "Tags", url = "tags", trailing_slash = true }
+]
+
+
+[[menu]]
+name = "Archive"
+url = "archive"
+trailing_slash = "true"

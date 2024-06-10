@@ -4,3 +4,6 @@
 [submodule "web/themes/creative"]
 	path = web/themes/creative
 	url = https://github.com/digitalcraftsman/hugo-creative-theme
+[submodule "web/themes/tabi"]
+	path = web/themes/tabi
+	url = https://github.com/welpo/tabi.git

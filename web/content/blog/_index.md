@@ -1,6 +1,8 @@
 +++
-title = "List of blog posts"
+paginate_by = 5
+path = "/blog"
+title = "Blog"
 sort_by = "date"
-template = "blog.html"
-page_template = "blog-page.html"
+template = "section.html"
+insert_anchor_links = "left"
 +++

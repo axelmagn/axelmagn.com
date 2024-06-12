@@ -11,7 +11,7 @@ generate_feed = true
 minify_html = true
 
 theme = "tabi"
-title = "Axel Magnuson Homepage"
+title = "axelmagn.com"
 
 taxonomies = [{name = "tags", feed = true}]
 
@@ -30,9 +30,3 @@ menu = [
     { name = "Archive", url = "archive", trailing_slash = true },
     { name = "Tags", url = "tags", trailing_slash = true }
 ]
-
-
-[[menu]]
-name = "Archive"
-url = "archive"
-trailing_slash = "true"

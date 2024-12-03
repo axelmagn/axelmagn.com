@@ -1,9 +1,6 @@
-[submodule "web/themes/air"]
-	path = web/themes/air
-	url = https://github.com/syui/hugo-theme-air
-[submodule "web/themes/creative"]
-	path = web/themes/creative
-	url = https://github.com/digitalcraftsman/hugo-creative-theme
-[submodule "web/themes/tabi"]
+[submodule "themes/tabi"]
 	path = web/themes/tabi
 	url = https://github.com/welpo/tabi.git
+[submodule "web/themes/anemone"]
+	path = web/themes/anemone
+	url = https://github.com/Speyll/anemone

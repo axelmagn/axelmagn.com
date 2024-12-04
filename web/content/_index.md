@@ -18,6 +18,16 @@ I'm nice.
 - [GitHub](https://github.com/axelmagn/)
 - [axelmagn@gmail.com](mailto:Axel%20Magnuson<axelmagn@gmail.com>)
 
+# Extracurriculars
+
+- [2024 Bevy Spooky Jam](https://itch.io/jam/bevy-spooky-jam)
+- [axelmagn.itch.io](https://axelmagn.itch.io/)
+  - [Stonehold](https://axelmagn.itch.io/stonehold): Your trusty sword has been
+    shattered. Stonehold is a mini-dungeon crawl where the enemies cannot be
+    killed. You'll have to find another way to defeat them.
+  - [Bevystein](https://axelmagn.itch.io/bevystein): A shooter made with Bevy in
+    the style of classic Wolfenstein. (incomplete)
+
 # Publications
 
 - [Writing in the Margins: Better Inference Pattern for Long Context
@@ -29,5 +39,5 @@ I'm nice.
   - This was my Master's thesis.  TL;DR: topic models are bad at predicting
     popularity (which is really unsurprising in retrospect), and I have the
     numbers to prove it.
-
+    
 # Recent Posts

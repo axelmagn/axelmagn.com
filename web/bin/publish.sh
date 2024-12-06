@@ -6,5 +6,5 @@ export CLOUDSDK_PYTHON="${HOME}/.pyenv/shims/python"
 
 pushd "${PROJECT_DIR}"
 zola build
-gsutil -m rsync -d -r public "${PUBLISH_TGT}"
+gcloud storage rsync --delete-unmatched-destination-objects -r public "${PUBLISH_TGT}"
 popd

@@ -1,16 +1,13 @@
 +++
-title = "mesocycle.dev"
+title = "axelmagn.com"
 paginate_by = 10 # posts per page
 +++
-
-# mesocycle.dev
 
 Hi, my name's Axel Magnuson. I've worked in tech for most of my life (mostly
 machine learning), and I dabble in video games and programming languages in my
 spare time. This is my personal site and blog, where I write about anything that
-crosses my mind.
-
-If you want to chat, the best way to reach me is via email.
+crosses my mind. If you want to chat, the best way to reach me is via email.
+Don't hesitate - I'm nice.
 
 ## Contact
 

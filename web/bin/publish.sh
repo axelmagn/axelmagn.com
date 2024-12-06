@@ -4,7 +4,7 @@ readonly PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &>/dev/null
 readonly PUBLISH_TGT="gs://www.axelmagn.com"
 export CLOUDSDK_PYTHON="${HOME}/.pyenv/shims/python"
 
-pushd "${PROJECT_DIR}/web"
+pushd "${PROJECT_DIR}"
 zola build
 gsutil -m rsync -d -r public "${PUBLISH_TGT}"
 popd

@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://www.mesocycle.dev"
+base_url = "https://www.axelmagn.com"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
@@ -13,9 +13,7 @@ theme = "anemone"
 
 title = "Axel Magnuson"
 
-taxonomies = [
-    {name = "tags", feed = true},
-]
+taxonomies = [{ name = "tags", feed = true }]
 
 [markdown]
 # Whether to do syntax highlighting
@@ -27,6 +25,6 @@ hightlight_theme = "css"
 # Put all your custom variables here
 list_pages = true
 header_nav = [
-  { url = "/", name_en = "/home/"},
-  { url = "/tags", name_en = "/tags/"},
+  { url = "/", name_en = "/home/" },
+  { url = "/tags", name_en = "/tags/" },
 ]

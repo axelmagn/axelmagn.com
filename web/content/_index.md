@@ -24,6 +24,9 @@ Don't hesitate - I'm nice.
     killed. You'll have to find another way to defeat them.
   - [Bevystein](https://axelmagn.itch.io/bevystein): A shooter made with Bevy in
     the style of classic Wolfenstein. (incomplete)
+- [Content Warning: The Thinking Machine with Axel Magnuson](https://content-warning-the-podcast.simplecast.com/episodes/the-thinking-machine-with-axel-magnuson):
+  A guest spot I did for my good friend Wally's podcast discussing some of the
+  recent hype and fears surrounding AI.
 
 ## Publications
 
@@ -31,8 +34,8 @@ Don't hesitate - I'm nice.
   - TL;DR: you can improve content retrieval on existing LLMs by generating
     intermediate data during KV cache prefilling.
 - [Evaluation of Topic Models for Content-Based Popularity Prediction on Social Microblogs](https://scholarworks.boisestate.edu/td/1080/)
-  - This was my Master's thesis. TL;DR: topic models are bad at predicting
-    popularity (which is really unsurprising in retrospect), and I have the
-    numbers to prove it.
+  - This was my Master's thesis. TL;DR: Latent Dirichlet Allocation is bad at
+    predicting popularity (which is really unsurprising in retrospect), and I
+    have the numbers to prove it.
 
 ## Recent Posts

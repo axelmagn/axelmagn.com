@@ -3,7 +3,7 @@ title = "Regarding Artificial Intelligence"
 date = "2024-12-05"
 description = "Official statement and general thoughts on the state of AI"
 
-draft = false
+draft = true
 
 [taxonomies]
 tags = ["Artificial Intelligence", "Machine Learning"]

@@ -1,14 +1,14 @@
 +++
 title = "Creative Mesocycles"
 description = "A methodology for planning creative work"
-
-# TODO: replace with publication date
 date = 2024-12-22
-
+# updated = ...
 draft = false
 
 [taxonomies]
 tags = ["life", "productivity", "mental health"]
+[extra]
+toc = true
 +++
 
 In 2024 I made two intentional changes to my habits: I started exercising every
@@ -73,7 +73,7 @@ provides a straightforward structure for athletes to work within. The
 intermediate breakdown into mesocycles allows them to focus on their long-term
 goals without becoming overwhelmed by the complexity.
 
-![Sports Periodization Overview](/001_mesocycles/mesocycles.png)
+![Sports Periodization Overview](/001_mesocycles/mesocycles2.png)
 
 The process boils down to:
 

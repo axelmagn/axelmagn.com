@@ -6,7 +6,7 @@ updated = 2024-12-23
 draft = false
 
 [taxonomies]
-tags = ["life", "productivity", "mental health"]
+tags = ["mesocycles", "productivity", "gamedev"]
 [extra]
 toc = true
 +++

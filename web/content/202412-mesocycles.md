@@ -11,6 +11,8 @@ tags = ["mesocycles", "productivity", "gamedev"]
 toc = true
 +++
 
+![Sports Periodization Overview](/202412-mesocycles/mesocycles2.png)
+
 In 2024 I made two intentional changes to my habits: I started exercising every
 day, and I stopped working on creative projects that take more than a month.
 Both of these changes have improved my life immensely. In the process, I have
@@ -72,8 +74,6 @@ it also has a long track record as a viable training methodology because it
 provides a straightforward structure for athletes to work within. The
 intermediate breakdown into mesocycles allows them to focus on their long-term
 goals without becoming overwhelmed by the complexity.
-
-![Sports Periodization Overview](/202412-mesocycles/mesocycles2.png)
 
 The process boils down to:
 

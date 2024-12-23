@@ -2,7 +2,7 @@
 title = "Creative Mesocycles"
 description = "A methodology for planning creative work"
 date = 2024-12-22
-# updated = ...
+updated = 2024-12-23
 draft = false
 
 [taxonomies]
@@ -191,7 +191,12 @@ of you.
 I think that in 2025 I want to work on a bigger game project. My brain is in a
 much healthier place, and it's feeling like I can finally tackle something like
 that. I am thinking of this as my new, more focused macrocycle, and it will be
-interesting to adapt my current schema of mesocycles into it.
+interesting to adapt my current schema of mesocycles into it. I have been
+journaling game concepts that contain a list of core features, and I think that
+for most of the year I want to focus on just building prototypes of those
+features. I want to use a mixture of the engines and tools I'm familiar with,
+and search for a prototype and workflow that I think is fun enough that I can be
+inspired by what I already have rather than what I imagine it could be.
 
 I suspect that every now and then I will have to have a "resting cycle" where I
 go off and work on something completely different just for the variety. Or maybe

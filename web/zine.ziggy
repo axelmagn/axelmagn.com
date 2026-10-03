@@ -1,0 +1,15 @@
+.zine_version = "0.14.1-dev+6c97829",
+.supermd = .{
+    .headings_h2 = true,
+},
+.site = .simple(.{
+    .title = "Axel Magnuson",
+    .host_url = "https://www.axelmagn.com",
+    .content_dir_path = "content",
+    .layouts_dir_path = "layouts",
+    .assets_dir_path = "assets",
+    .static_assets = [
+        "Temml.woff2",
+    ],
+}),
+

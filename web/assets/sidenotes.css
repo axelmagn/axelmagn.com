@@ -1,0 +1,40 @@
+/* Sidenotes for Simple.css, driven by ordinary Markdown footnotes.
+   Needs the footnote loop from post.shtml. Load after simple.css.   */
+
+.footnote-ref a { text-decoration: none; }
+
+/* Default (phones, older browsers): a normal footnote list after the post */
+.sidenotes {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-light);
+}
+.sidenotes li { margin-bottom: 0.5em; }
+.sidenotes li::marker { color: var(--accent); }
+.sidenotes p { margin: 0 0 0.5em; }
+.sidenotes p:last-of-type { display: inline; }
+.sidenotes .backref { margin-left: 0.25em; text-decoration: none; }
+
+/* Wide screens with anchor positioning: move each note beside its reference */
+@supports (anchor-name: --a) {
+  @media (min-width: 70rem) {
+    /* Simple.css centres a 45rem column; add a track so there is a margin */
+    body { grid-template-columns: 1fr min(45rem, 90%) 18rem 1fr; }
+    main { position: relative; }
+
+    .sidenotes { margin: 0; padding: 0; border: 0; }
+    .sidenotes > li {
+      margin: 0;
+      position: absolute;          /* position-anchor is set inline by the layout */
+      anchor-name: --sidenote;
+      left: calc(100% + 2rem);
+      width: 16rem;
+      /* level with its reference, or just below the previous note if that's lower */
+      top: max(anchor(top), anchor(--sidenote bottom, 0px) + 0.75rem);
+    }
+    .sidenotes .backref { display: none; }
+  }
+}

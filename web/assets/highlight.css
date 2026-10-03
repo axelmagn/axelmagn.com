@@ -1,0 +1,425 @@
+/**
+ * highlight.css
+ * Syntax highlighting for Tree-sitter tokens emitted by Zine / SuperMD.
+ * Powered by Modus Themes primitive variables (--modus-*).
+ */
+
+/* ==========================================================================
+   Code Block Container Defaults
+   ========================================================================== */
+
+pre {
+  background-color: var(--modus-bg-dim);
+  border: var(--border-width, 1px) solid var(--modus-border);
+  border-radius: var(--standard-border-radius, 5px);
+  padding: 1rem 1.4rem;
+  overflow-x: auto;
+  color: var(--modus-fg-main);
+  line-height: 1.5;
+}
+
+pre code {
+  color: var(--modus-fg-main);
+  background: none;
+  font-family: var(--mono-font, monospace);
+  font-size: 0.95em;
+  padding: 0;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Keywords & Directives
+   ========================================================================== */
+
+code .keyword,
+code .keyword_modifier,
+code .keyword-modifier,
+code .keyword_function,
+code .keyword-function,
+code .keyword_return,
+code .keyword-return,
+code .keyword_conditional,
+code .keyword-conditional,
+code .keyword_conditional_ternary,
+code .keyword_repeat,
+code .keyword-repeat,
+code .keyword_coroutine,
+code .keyword-coroutine,
+code .keyword_import,
+code .keyword-import,
+code .keyword_directive,
+code .keyword-directive,
+code .keyword_directive_define,
+code .keyword_exception,
+code .keyword-exception,
+code .keyword_debug,
+code .keyword-debug,
+code .storage,
+code .storage_modifier,
+code .include {
+  color: var(--modus-keyword);
+}
+
+/* Specific keywords mapped to their semantic equivalents */
+code .keyword_type,
+code .keyword-type,
+code .storage_type {
+  color: var(--modus-type);
+}
+
+code .keyword_operator,
+code .keyword-operator {
+  color: var(--modus-operator);
+}
+
+/* ==========================================================================
+   Functions & Methods
+   ========================================================================== */
+
+code .function,
+code .function_call,
+code .function-call,
+code .function_method,
+code .function-method,
+code .function_method_call,
+code .function-method-call,
+code .method,
+code .method_call {
+  color: var(--modus-fnname);
+}
+
+code .function_builtin,
+code .function-builtin,
+code .builtin {
+  color: var(--modus-builtin);
+}
+
+code .function_macro,
+code .function-macro,
+code .macro {
+  color: var(--modus-preprocessor);
+}
+
+code .constructor {
+  color: var(--modus-type);
+}
+
+/* ==========================================================================
+   Types & Structures
+   ========================================================================== */
+
+code .type,
+code .type_definition,
+code .type-definition,
+code .type_parameter,
+code .type-parameter,
+code .class,
+code .struct,
+code .enum,
+code .interface,
+code .union,
+code .typedef,
+code .primitive {
+  color: var(--modus-type);
+}
+
+code .type_builtin,
+code .type-builtin {
+  color: var(--modus-builtin);
+}
+
+code .type_qualifier,
+code .type-qualifier {
+  color: var(--modus-keyword);
+}
+
+/* ==========================================================================
+   Variables, Properties & Identifiers
+   ========================================================================== */
+
+code .variable,
+code .variable_parameter,
+code .variable-parameter,
+code .parameter {
+  color: var(--modus-variable);
+}
+
+code .variable_builtin,
+code .variable-builtin {
+  color: var(--modus-builtin);
+}
+
+code .variable_member,
+code .variable-member,
+code .member,
+code .field,
+code .property,
+code .property_identifier {
+  color: var(--modus-property);
+}
+
+/* ==========================================================================
+   Constants, Booleans & Numbers
+   ========================================================================== */
+
+code .constant {
+  color: var(--modus-constant);
+}
+
+code .constant_builtin,
+code .constant-builtin {
+  color: var(--modus-builtin);
+}
+
+code .constant_macro,
+code .constant-macro {
+  color: var(--modus-preprocessor);
+}
+
+code .boolean,
+code .constant_builtin_boolean,
+code .constant_boolean {
+  color: var(--modus-constant);
+}
+
+code .number,
+code .number_float,
+code .float,
+code .constant_numeric,
+code .constant-numeric {
+  color: var(--modus-number);
+}
+
+/* ==========================================================================
+   Strings, Characters & Regular Expressions
+   ========================================================================== */
+
+code .string,
+code .string_special,
+code .string-special,
+code .character,
+code .character_special {
+  color: var(--modus-string);
+}
+
+code .string_regex,
+code .string-regex,
+code .regex {
+  color: var(--modus-rx-construct);
+}
+
+code .string_escape,
+code .string-escape,
+code .escape,
+code .punctuation_special,
+code .punctuation-special {
+  color: var(--modus-rx-backslash);
+}
+
+code .string_symbol,
+code .string-symbol,
+code .symbol {
+  color: var(--modus-constant);
+}
+
+/* ==========================================================================
+   Comments & Documentation
+   ========================================================================== */
+
+code .comment,
+code .comment_line,
+code .comment-line,
+code .comment_block,
+code .comment-block {
+  color: var(--modus-comment);
+  font-style: italic;
+}
+
+code .comment_documentation,
+code .comment-documentation,
+code .docstring {
+  color: var(--modus-docstring);
+  font-style: italic;
+}
+
+code .docmarkup {
+  color: var(--modus-docmarkup);
+}
+
+code .comment_error,
+code .comment-error {
+  color: var(--modus-err);
+  font-weight: bold;
+}
+
+code .comment_warning,
+code .comment-warning {
+  color: var(--modus-warning);
+  font-weight: bold;
+}
+
+code .comment_todo,
+code .comment-todo,
+code .comment_note,
+code .comment-note,
+code .todo {
+  color: var(--modus-info);
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   Operators & Punctuation
+   ========================================================================== */
+
+code .operator,
+code .operator_assignment,
+code .operator-assignment {
+  color: var(--modus-operator);
+}
+
+code .punctuation,
+code .punctuation_delimiter,
+code .punctuation-delimiter,
+code .delimiter {
+  color: var(--modus-delimiter);
+}
+
+code .punctuation_bracket,
+code .punctuation-bracket,
+code .bracket {
+  color: var(--modus-bracket);
+}
+
+/* ==========================================================================
+   Markup, HTML, XML & Tags
+   ========================================================================== */
+
+code .tag {
+  color: var(--modus-keyword);
+}
+
+code .tag_builtin,
+code .tag-builtin {
+  color: var(--modus-builtin);
+}
+
+code .tag_delimiter,
+code .tag-delimiter {
+  color: var(--modus-delimiter);
+}
+
+code .tag_attribute,
+code .tag-attribute,
+code .attribute {
+  color: var(--modus-property);
+}
+
+code .namespace,
+code .module {
+  color: var(--modus-type);
+}
+
+code .markup_heading,
+code .markup-heading,
+code .heading {
+  color: var(--modus-fg-heading-1);
+  font-weight: bold;
+}
+
+code .markup_bold,
+code .markup-bold,
+code .bold {
+  font-weight: bold;
+}
+
+code .markup_italic,
+code .markup-italic,
+code .italic {
+  font-style: italic;
+}
+
+code .markup_strikethrough,
+code .markup-strikethrough {
+  text-decoration: line-through;
+}
+
+code .markup_link,
+code .markup-link,
+code .markup_link_url,
+code .markup-link-url {
+  color: var(--modus-fg-link);
+  text-decoration: underline;
+}
+
+code .markup_link_label,
+code .markup-link-label {
+  color: var(--modus-fg-alt);
+}
+
+code .markup_raw,
+code .markup-raw {
+  color: var(--modus-fg-prose-code);
+}
+
+code .markup_list,
+code .markup-list,
+code .list {
+  color: var(--modus-punctuation);
+}
+
+/* ==========================================================================
+   Diffs & Version Control Spans
+   ========================================================================== */
+
+code .diff_plus,
+code .diff-plus,
+code .diff_added,
+code .diff-added {
+  color: var(--modus-fg-added);
+  background-color: var(--modus-bg-added-faint);
+}
+
+code .diff_minus,
+code .diff-minus,
+code .diff_removed,
+code .diff-removed {
+  color: var(--modus-fg-removed);
+  background-color: var(--modus-bg-removed-faint);
+}
+
+code .diff_delta,
+code .diff-delta,
+code .diff_changed,
+code .diff-changed {
+  color: var(--modus-fg-changed);
+  background-color: var(--modus-bg-changed-faint);
+}
+
+/* ==========================================================================
+   Errors, Diagnostics & Prompts
+   ========================================================================== */
+
+code .error {
+  color: var(--modus-err);
+  text-decoration: underline wavy var(--modus-underline-err);
+}
+
+code .warning {
+  color: var(--modus-warning);
+  text-decoration: underline wavy var(--modus-underline-warning);
+}
+
+code .prompt {
+  color: var(--modus-fg-prompt);
+}
+
+code .command {
+  color: var(--modus-keyword);
+  font-weight: bold;
+}
+
+code .line_number,
+code .line-number {
+  color: var(--modus-fg-dim);
+  user-select: none;
+}

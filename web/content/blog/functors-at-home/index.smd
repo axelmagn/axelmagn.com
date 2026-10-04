@@ -1,0 +1,166 @@
+---
+.title = "Zig Modules: We Have Functors at Home",
+.date = .date("2026-10-03"),
+.layout = "post.shtml",
+.authors = ["Axel Magnuson"],
+.tags = ["zig"]
+---
+
+Considerable[^frei2022] ink[^seguin2023] has[^wong2025] been[^mckay2025]
+spilled[^cypert2026] on Zig Interfaces, and justifiably so.  While not a
+language feature, interfaces are the de-facto way of implementing runtime
+polymorphism in Zig. Yet[^kelley2021] more[^redig2025] has been said about
+zig's comptime, and how it may be leveraged to avoid the performance woes of
+dynamic dispatch and write slick, data-oriented code.
+
+I will assume that the reader already has a passing familiarity with these
+concepts.  For many in the Zig community, I expect them to already be de
+rigueur in your everyday code, and I do not think I can explain them better
+than others have done. For the sake of brevity, let us summarize it thusly:
+
+1. **Dynamic Polymorphism**: Opaque pointers, virtual tables, and dynamic dispatch.
+2. **Static Polymorphism**: Type arguments, switch statements, and comptime duck typing.
+
+If you, like me, are a pervert for systems programming articles, you may have
+noticed an emerging theme over the past few years in the Zig community and
+beyond.  It goes something like:
+
+> "Look at all the ways OOP was wrong and slow.  Let us cast it aside, and
+> march forward into a future that is bright and data oriented."
+> -- me, just now
+
+
+
+
+
+
+
+
+
+[^seguin2023]: [Zig Interfaces](https://www.openmymind.net/Zig-Interfaces/)
+by Karl Seguin
+
+[^wong2025]: [Zig Interface
+Revisited](https://williamw520.github.io/2025/07/13/zig-interface-revisited.html)
+by William Wong
+
+[^mckay2025]: [Inside Zig's new
+Writer](https://joegm.github.io/blog/inside-zigs-new-writer-interface/) by Joe
+McKay
+
+[^frei2022]: [Zig Interfaces](https://ethanfrei.com/posts/zig-interfaces.html) by Ethan Frei
+
+[^cypert2026]: [Interfaces in
+Zig](https://www.bradcypert.com/interfaces-in-zig/) by Brad Cypert
+
+[^kelley2021]: [A Practical Guide to Applying Data-Oriented
+Design](https://vimeo.com/649009599) by Andrew Kelley
+
+[^redig2025]: [Zig Comptime is Bonkers Good](https://www.scottredig.com/blog/bonkers_comptime/) by Scott Redit
+
+Thesis: Decoupling your functions from your data leads to great happiness.
+
+
+# First Class Functions in Zig
+
+## Dynamic Dispatch
+
+Zig, like C, supports dynamic dispatch by passing function pointers.
+
+
+```zig
+// LISTING 1-1
+fn mapInts(values: []i32, output: []i32, function: *const fn (i32) i32) void {
+    const n = @min(values.len, output.len);
+    for (0..n) |i| {
+        output[i] = function(values[i]);
+    }
+}
+
+fn mul2(x: i32) i32 {
+    return x * 2;
+}
+
+fn add3(x: i32) i32 {
+    return x + 3;
+}
+
+export fn run(input: [*c]i32, output: [*c]i32, n: usize) void {
+    mapInts(input[0..n], output[0..n], mul2);
+    mapInts(output[0..n], output[0..n], add3);
+}
+```
+
+This style of dynamic dispatch is used throughout the standard library to
+support open-set runtime interfaces. [^zig-interfaces]
+
+[^zig-interfaces]: For a deeper dive into zig interfaces, see the excellent
+[Zig Interfaces](https://www.openmymind.net/Zig-Interfaces/) article by Karl
+Seguin
+
+
+```zig
+// LISTING 1-2
+const Shape = struct {
+    ptr: *const anyopaque,
+    areaFn: *const fn (*const anyopaque) f64,
+
+    fn area(self: *const Shape) f64 {
+        return self.areaFn(self.ptr);
+    }
+};
+
+const Square = struct {
+    side: f64,
+
+    fn shape(self: *const Square) Shape {
+        return .{ .ptr = self, .areaFn = area };
+    }
+
+    fn area(p: *const anyopaque) f64 {
+        const self: *const square = @ptrcast(@aligncast(p));
+        return self.side * self.side;
+    }
+};
+
+// this is simple enough for inlining
+export fn runfast(square: *const square) f64 {
+    return square.shape().area();
+}
+
+// this is not
+export fn runslow(n: usize) f64 {
+    var squares: [64]square = undefined;
+    var shapes: [64]shape = undefined;
+    const len = @min(n, 64);
+    for (0..len) |i| {
+        squares[i] = .{ .side = @floatfromint(i) };
+        shapes[i] = squares[i].shape();
+    }
+    var total: f64 = 0;
+    for (shapes[0..len]) |s| total += s.area();
+    return total;
+}
+```
+
+This pattern forms a strong basis for everyday runtime polymorphism in Zig.
+Zig's simplicity and explicitness leads to interfaces that are somewhat more
+verbose than the sugared versions found in C# or Java, but they are not too
+cumbersome.
+
+The release compiler will even be able to identify inlining opportunities for
+basic invocations. However it does not require much complexity to stymie the
+compiler, and beyond this point, the standard performance overhead of dynamic
+dispatch applies. [^godbolt1-2]
+
+[^godbolt1-2]: See the assembly output for [Listing
+1-2](https://godbolt.org/z/687Pr1a6j0).  Note however that dynamic dispatch is
+not strictly less performant than static dispatch.  Polymorphism through static
+dispatch can blow up your binary size and thrash your cache if used
+uncritically.
+
+## Static Dispatch
+
+While it's not as prevalent in the standard library, you can 
+
+

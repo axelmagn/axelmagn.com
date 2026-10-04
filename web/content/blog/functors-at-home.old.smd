@@ -1,0 +1,200 @@
+---
+.title = "We Have Functors at Home (old)",
+.date = .date("2026-10-02"),
+.layout = "post.shtml",
+.authors = ["Axel Magnuson"],
+.tags = ["zig"]
+---
+
+Zig has rapidly become one of my favorite programming languages.  From first
+use, I’ve found it to be simple, powerful, and elegant. 
+
+# In Praise of Zig
+
+One of my favorite things about Zig is its relatively small surface area.
+Coming from languages like rust and C++, Zig is **simple**.  It took me maybe a
+weekend to pick up, and after I got over such particularities as array typing
+and comptime, there just wasn’t that more to understand.  Where complexities
+exist, they usually reflect practical decisions around interacting with C and
+assembly.  The language reference is short and sweet enough to sit in a browser
+tab and be my primary reference.
+
+A drawback of this simplicity is that parts of Zig can feel bare-bones
+compared to more complex languages.  When I first adopted it, there was a
+painful period where I yearned for the implicit type conversions and abstract
+traits of other, more complex languages.  Zig promises to be a language where
+code stays simple and concrete, but this becomes a stumbling block when you
+find places where you would usually put abstraction.
+
+What I found over time is that while Zig comes with very few built in type
+mechanics, the first-class nature of its types allow you to borrow liberally
+from other type systems without too much effort.  In doing so, it forces you to
+think about what is really happening under the hood when you use a Java
+interface or a Rust trait.
+
+(TODO: finish preamble)
+
+(TODO: see also: )
+
+
+# Polymorphism Out of the Box
+
+This article is not meant to be a comprehensive intro to Zig interfaces.  For
+that, see this *excellent* article by Karl Seguin: [Zig
+Interfaces](https://www.openmymind.net/Zig-Interfaces/).  However as a starting
+point, I think it's necessary to at least touch on what you get out of the box
+with Zig.  These conventions become the foundation for the more theoretical
+stuff that will follow.
+
+## Comptime Duck Typing
+
+If you learned Zig through any of the popular learning resources, you have
+already been introduced to duck typing during comptime.  This idiom is used
+broadly within the Zig standard library, and it is sufficient for many use
+cases.
+
+```zig
+// FROM: https://ziglang.org/documentation/0.16.0/#Compile-Time-Parameters
+fn max(comptime T: type, a: T, b: T) T {
+    return if (a > b) a else b;
+}
+fn gimmeTheBiggerFloat(a: f32, b: f32) f32 {
+    return max(f32, a, b);
+}
+fn gimmeTheBiggerInteger(a: u64, b: u64) u64 {
+    return max(u64, a, b);
+}
+```
+
+```zig
+// FROM: https://ziglang.org/documentation/0.16.0/#Function-Parameter-Type-Inference
+fn addFortyTwo(x: anytype) @TypeOf(x) {
+    return x + 42;
+}
+```
+
+Comptime duck typing is the practical, “default” way to accomplish static
+polymorphism in Zig, and it is the simplest way to implement a lot of everyday
+abstraction.  I’ve spent enough time writing Python to be wary of duck typing,
+but restricting duck typing to comptime elegantly solves most of my concerns.
+If type `T` in the above example is not comparable, or `x` is not a number, the
+invocation will fail to compile.
+
+It also makes it very easy to reason about the code that will be produced by the 
+
+It is also trivially easy to validate input types at compile time.  Not only
+does this help you explicitly check your invariants, but it naturally leads to
+more legible error messages for the developer.
+
+```zig
+pub fn printName(entity: anytype) void {
+    comptime if (!@hasField(@TypeOf(entity), "name")) {
+        @compileError("entity must have a 'name' field.");
+    };
+    std.debug.print("Name: {s}\n", .{entity.name});
+}
+
+```
+
+There are, however, some drawbacks to duck typing.  It makes it difficult to
+encode type constraints on functions in a repeatable way, and this can be
+cumbersome if you are used to type bounds such as interfaces, traits or
+typeclasses.
+
+### Comptime Example: ncast
+
+## Runtime Interfaces
+
+
+The Zig standard library also makes frequent use of fat pointers and vtables in
+its `Allocator` and `IO` structs.  These are notable first because these serve
+as a practical example of runtime polymorphism conventions in zig, and second
+because they illustrate an important underlying principle:
+
+> Zig makes you think about *how* type sugars in other languages work.
+
+To see what I mean, let's look at an abridged version of the `Allocator`
+interface and how the `ArenaAllocator` implementation exposes it.
+
+```zig
+const Allocator = struct {
+    ptr: *anyopaque,
+    vtable: *const VTable,
+
+    pub const VTable = struct {
+        alloc: *const fn (*anyopaque, len: usize, alignment: Alignment, ret_addr: usize) ?[*]u8,
+        resize: *const fn (*anyopaque, memory: []u8, alignment: Alignment, new_len: usize, ret_addr: usize) bool,
+        remap: *const fn (*anyopaque, memory: []u8, alignment: Alignment, new_len: usize, ret_addr: usize) ?[*]u8,
+        free: *const fn (*anyopaque, memory: []u8, alignment: Alignment, ret_addr: usize) void,
+    };
+
+    // [...] (functions built on top of the vtable)
+}
+
+const ArenaAllocator = struct {
+    child_allocator: Allocator,
+    state: State,
+
+    pub fn allocator(arena: *ArenaAllocator) Allocator {
+        return .{
+            .ptr = arena,
+            .vtable = &.{
+                .alloc = alloc,
+                .resize = resize,
+                .remap = remap,
+                .free = free,
+            },
+        };
+    }
+
+    fn alloc(ctx: *anyopaque, n: usize, alignment: Alignment, ret_addr: usize) ?[*]u8 { ... }
+    fn resize(*anyopaque, memory: []u8, alignment: Alignment, new_len: usize, ret_addr: usize) bool { ... }
+    fn remap(*anyopaque, memory: []u8, alignment: Alignment, new_len: usize, ret_addr: usize) ?[*]u8 { ... }
+    fn free(*anyopaque, memory: []u8, alignment: Alignment, ret_addr: usize) void { ... }
+
+    // [...] arena-specific functions
+}
+```
+
+I love this pattern.  It's an elegant representation of exactly how other
+languages use dynamic dispatch under the hood to implement runtime
+polymorphism.  However virtual function calls like these also haved drawbacks.
+The opaque types combined with dynamic dispatch confound a lot of compiler
+optimizations, as well as incurring a runtime overhead.
+
+If you're clever, there are some good ways to minimize this overhead by keeping
+the hot path outside of the dynamic dispatch. Take for example this (toy)
+reader interface:
+
+```zig
+ptr: *anyopaque,
+vtable: *const VTable,
+buffer: [4096]u8,
+head: usize,
+tail: usize,
+
+const VTable = struct {
+    readBytes: *const fn (ptr: *anyopaque, dest: []u8) anyerror!usize,
+}
+
+fn readByte(self: *@This()) !u8 {
+    if (self.head >= self.tail) {
+        // slow path: read more bytes from interface
+        @branchHint(.unlikely);
+        self.tail = try self.vtable.readBytes(self.ptr, &self.buffer);
+        self.head = 0;
+        if (self.tail == 0) return error.end_of_stream;
+    }
+
+    // fast path: read buffered byte
+    defer self.head += 1;
+    return self.buffer[self.head];
+}
+```
+
+This is pretty close to how Zig's current Reader and Writer interfaces are
+implemented.  It's a little out of scope for this article, but for a deeper
+dive see [this excellent
+article](https://joegm.github.io/blog/inside-zigs-new-writer-interface/) by Joe
+Mckay.
+

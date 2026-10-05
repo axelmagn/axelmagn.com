@@ -15,14 +15,14 @@ pre {
   padding: 1rem 1.4rem;
   overflow-x: auto;
   color: var(--modus-fg-main);
-  line-height: 1.5;
+  line-height: 1.1;
 }
 
 pre code {
   color: var(--modus-fg-main);
   background: none;
   font-family: var(--mono-font, monospace);
-  font-size: 0.95em;
+  font-size: 0.9em;
   padding: 0;
   margin: 0;
 }

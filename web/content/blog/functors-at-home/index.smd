@@ -1,12 +1,20 @@
 ---
-.title = "Zig Modules: We Have Functors at Home",
+.title = "We Have Functors at Home",
 .date = .date("2026-10-03"),
 .layout = "post.shtml",
 .authors = ["Axel Magnuson"],
-.tags = ["zig"]
+.tags = ["zig", "traits", "functors"]
 ---
 
-Considerable[^frei2022] ink[^seguin2023] has[^wong2025] been[^mckay2025]
+_**TL;DR:** You can map Ocaml modules and module functors to Zig pretty easily,
+and it ends up being a really nice way to reason about static polymorphism._
+
+I have had more time recently to write code in Zig, and it has been good for my
+soul.  I wanted to share some insights I have arrived at regarding abstractions
+in Zig, including some techniques that I have found useful but not seen
+employed more broadly.
+
+Considerable[^seguin2023] ink[^figuratively] has[^wong2025] been[^mckay2025]
 spilled[^cypert2026] on Zig Interfaces, and justifiably so.  While not a
 language feature, interfaces are the de-facto way of implementing runtime
 polymorphism in Zig. Yet[^kelley2021] more[^redig2025] has been said about
@@ -18,24 +26,53 @@ concepts.  For many in the Zig community, I expect them to already be de
 rigueur in your everyday code, and I do not think I can explain them better
 than others have done. For the sake of brevity, let us summarize it thusly:
 
-1. **Dynamic Polymorphism**: Opaque pointers, virtual tables, and dynamic dispatch.
-2. **Static Polymorphism**: Type arguments, switch statements, and comptime duck typing.
+1. **Dynamic Polymorphism**: Opaque pointers, virtual tables, and dynamic
+   dispatch.
+2. **Static Polymorphism**: Type arguments, switch statements, and comptime
+   duck typing.
 
-If you, like me, are a pervert for systems programming articles, you may have
-noticed an emerging theme over the past few years in the Zig community and
-beyond.  It goes something like:
+If you are coming from another strongly typed language, you would be forgiven
+for finding this state of affairs rather simplistic. This is perhaps by design
+-- Zig aims to be simple.  However if you have grown accustomed to traits and
+typeclasses, there appears to be no ready equivalent in Zig. I will argue that,
+with a little adaptation, Rust's traits and Ocaml's modules can in fact be
+expressed perfectly elegantly in Zig userland.
 
-> "Look at all the ways OOP was wrong and slow.  Let us cast it aside, and
-> march forward into a future that is bright and data oriented."
-> -- me, just now
+So as not to bury the lead, let me begin with a brief example.
 
+```zig
+fn Monoid(T: type) type {
+    return struct {
+        empty: T,
+        combine: fn (T, T) T,
+    };
+}
 
+fn Sum(T: type) Monoid(T) {
+    const inner = struct {
+        fn add(x: T, y: T) T { return x + y; }
+    };
+    return .{ .empty = 0, .combine = inner.add };
+}
 
+fn fold(T: type, xs: []const T, m: Monoid(T)) T {
+    var accum = m.empty;
+    for (xs) |x| accum = m.combine(accum, x);
+    return accum;
+}
 
+export fn run(buf: [*c]i32, n: usize) i32 {
+    return fold(i32, buf[0..n], Sum(i32));
+}
+```
 
-
-
-
+Ugh.  Isn't that just buttery smooth?[^so-good]  The contract is clear, LSP
+autocompletion picks it up, the compiler even knows to [inline
+it](https://godbolt.org/z/Tqe897cd1) and unroll the loop.  I picked
+monoids[^monoids-intro] because I wanted to show off some sexy functional
+programming capabilities, but it works just as well with everyday interfaces -
+storage, algebra, writers, anything where you want to declare a generic
+abstraction.
 
 [^seguin2023]: [Zig Interfaces](https://www.openmymind.net/Zig-Interfaces/)
 by Karl Seguin
@@ -48,7 +85,8 @@ by William Wong
 Writer](https://joegm.github.io/blog/inside-zigs-new-writer-interface/) by Joe
 McKay
 
-[^frei2022]: [Zig Interfaces](https://ethanfrei.com/posts/zig-interfaces.html) by Ethan Frei
+[^frei2022]: [Zig
+Interfaces](https://ethanfrei.com/posts/zig-interfaces.html) by Ethan Frei
 
 [^cypert2026]: [Interfaces in
 Zig](https://www.bradcypert.com/interfaces-in-zig/) by Brad Cypert
@@ -56,111 +94,391 @@ Zig](https://www.bradcypert.com/interfaces-in-zig/) by Brad Cypert
 [^kelley2021]: [A Practical Guide to Applying Data-Oriented
 Design](https://vimeo.com/649009599) by Andrew Kelley
 
-[^redig2025]: [Zig Comptime is Bonkers Good](https://www.scottredig.com/blog/bonkers_comptime/) by Scott Redit
+[^redig2025]: [Zig Comptime is Bonkers
+Good](https://www.scottredig.com/blog/bonkers_comptime/) by Scott Redit
 
-Thesis: Decoupling your functions from your data leads to great happiness.
+[^so-good]: [Feels Good]($image.asset('so_good.png'))
+
+[^figuratively]: figuratively
+
+[^monoids-intro]: Monoids are one of my favorite FP concepts.  Once you
+understand them, you will be seeing monoids everywhere.  There are a lot of
+good explainers for them.  I recommend [Monoids Without
+Tears](https://fsharpforfunandprofit.com/posts/monoids-without-tears/) by Scott
+Wlaschin
 
 
-# First Class Functions in Zig
+# Decoupling Data From Functions
 
-## Dynamic Dispatch
+One of the more pernicious harms of OOP is how it has rewired everyone's brains
+to zealously couple methods to data.  Even in languages such as Zig, which
+eschews OOP, we still have the facilities to declare "methods" on structs. I
+fear that for programmers who have already written a lot of object oriented
+code, it is too easy to treat this facility as an obligation.  It can feel
+*unergonomic* to call a function that is not preceded by a dot accessor, and
+yet that is what I am going to ask you to do.
 
-Zig, like C, supports dynamic dispatch by passing function pointers.
+Zig took the OOP concept of an interface, and implemented it in userland to
+solve the runtime abstraction problem.  It said "well, other languages
+implement interfaces as VTables and opaque pointers, so let's just make that
+explicit."  I don't have any beef with that.  In fact, I can't think of a
+better way to solve that particular problem.  However in the general case, I
+think we can do better.
 
+Instead, let's think in terms of just **data** and **functions** that transform
+that data.  When I declare a trait in Rust or a module signature in OCaml, I am
+really declaring a type that describes a set of function signatures, made
+generic over a type that has not yet been specified.  Then an implementation is
+a value of this type.  Both the trait/signature and the implementation are
+available at comptime.  Thankfully, Zig already has facilities for all of this.
+
+## Interfaces
+
+Let's take a closer look at a typical interface.  Suppose that we are writing a
+simple 2D geometry library.  We don't know how it's going to be used yet, but
+we know that there are certain functions that all shapes need to implement.
+The library consumer should be able to supply their own shape types.  We might
+express this as an interface like so:
 
 ```zig
-// LISTING 1-1
-fn mapInts(values: []i32, output: []i32, function: *const fn (i32) i32) void {
-    const n = @min(values.len, output.len);
-    for (0..n) |i| {
-        output[i] = function(values[i]);
-    }
-}
-
-fn mul2(x: i32) i32 {
-    return x * 2;
-}
-
-fn add3(x: i32) i32 {
-    return x + 3;
-}
-
-export fn run(input: [*c]i32, output: [*c]i32, n: usize) void {
-    mapInts(input[0..n], output[0..n], mul2);
-    mapInts(output[0..n], output[0..n], add3);
-}
-```
-
-This style of dynamic dispatch is used throughout the standard library to
-support open-set runtime interfaces. [^zig-interfaces]
-
-[^zig-interfaces]: For a deeper dive into zig interfaces, see the excellent
-[Zig Interfaces](https://www.openmymind.net/Zig-Interfaces/) article by Karl
-Seguin
-
-
-```zig
-// LISTING 1-2
 const Shape = struct {
-    ptr: *const anyopaque,
-    areaFn: *const fn (*const anyopaque) f64,
+    ptr: *anyopaque,
+    vtable: *const VTable,
 
-    fn area(self: *const Shape) f64 {
-        return self.areaFn(self.ptr);
-    }
+    const VTable = struct {
+        area: *const fn (*anyopaque) f32,
+        containsPoint: *const fn (*anyopaque, f32, f32) bool,
+    };
 };
+```
 
-const Square = struct {
-    side: f64,
+Then we could have a bunch of functions that accept `Shape` as an argument and
+do interesting things with it.
 
-    fn shape(self: *const Square) Shape {
-        return .{ .ptr = self, .areaFn = area };
+```zig
+fn checkCollisions(shapes []const Shape, x: f32, y: f32) ?*Shape {
+    for (shapes) |*shape| {
+        if (shape.containsPoint(x, y)) return shape;
     }
-
-    fn area(p: *const anyopaque) f64 {
-        const self: *const square = @ptrcast(@aligncast(p));
-        return self.side * self.side;
-    }
-};
-
-// this is simple enough for inlining
-export fn runfast(square: *const square) f64 {
-    return square.shape().area();
+    return null;
 }
 
-// this is not
-export fn runslow(n: usize) f64 {
-    var squares: [64]square = undefined;
-    var shapes: [64]shape = undefined;
-    const len = @min(n, 64);
-    for (0..len) |i| {
-        squares[i] = .{ .side = @floatfromint(i) };
-        shapes[i] = squares[i].shape();
+fn totalArea(shapes []const Shape) f32 {
+    var accum: = 0;
+    for (shapes) |shape| {
+        accum += shape.area();
     }
-    var total: f64 = 0;
-    for (shapes[0..len]) |s| total += s.area();
-    return total;
+    return accum;
 }
 ```
 
-This pattern forms a strong basis for everyday runtime polymorphism in Zig.
-Zig's simplicity and explicitness leads to interfaces that are somewhat more
-verbose than the sugared versions found in C# or Java, but they are not too
-cumbersome.
+If a consumer of this library wants to use it, they would ostensibly need to
+build their own `Shape` implementations for each shape type (this can get a
+little tedious).
 
-The release compiler will even be able to identify inlining opportunities for
-basic invocations. However it does not require much complexity to stymie the
-compiler, and beyond this point, the standard performance overhead of dynamic
-dispatch applies. [^godbolt1-2]
+```zig
+const Circle = struct {
+    x: f32,
+    y: f32,
+    radius: f32,
 
-[^godbolt1-2]: See the assembly output for [Listing
-1-2](https://godbolt.org/z/687Pr1a6j0).  Note however that dynamic dispatch is
-not strictly less performant than static dispatch.  Polymorphism through static
-dispatch can blow up your binary size and thrash your cache if used
-uncritically.
+    const vtable: Shape.VTable {
+        .area = area,
+        .containsPoint = containsPoint,
+    };
 
-## Static Dispatch
+    fn shape(self: *Circle) Shape {
+        return .{
+            .ptr = self,
+        };
+    }
 
-While it's not as prevalent in the standard library, you can 
+    fn area(ptr: *anyopaque) f32 {
+        const self: *Circle = @ptrCast(alignCast(self));
+        return self.radius * self.radius;
+    }
 
+    fn containsPoint(ptr: *anyopaque, x: f32, y: f32) bool {
+        const self: *Circle = @ptrCast(alignCast(self));
+        const dx = self.x - x;
+        const dy = self.y - y;
+        return dx * dx + dy * dx < self.radius * self.radius;
+    }
+}
+```
+
+This works, but it sure bakes in a lot of assumptions about the access pattern.
+If we really need runtime polymorphism, fine, but we are pretty much locked
+into dynamic dispatch, and I'll need to keep a sidecar list of interfaces to
+accompany my circles. Let's hope I can keep those straight.  We are sort of
+conflating a type's contract with some of its access details.
+
+It's also just *a bit OOP* isn't it?  Once I have coupled my functions to an
+opaque pointer like that, it doesn't make much sense to ever decouple them.
+Those functions are not much use if you don't keep *very good track* of the
+pointer they are coupled to.
+
+## Duck Typing
+
+Consider instead the duck-typing alternative.  How would we define this if we
+wanted static polymorphism?  The way I see used most commonly is to rely on
+Zig's duck typing:
+
+```zig
+fn checkCollisions(T: type, shapes []const T, x: f32, y: f32) ?*T {
+    for (shapes) |*shape| {
+        if (shape.containsPoint(x, y)) return shape;
+    }
+    return null;
+}
+
+fn totalArea(T: type, shapes []const T) f32 {
+    var accum: = 0;
+    for (shapes) |shape| {
+        accum += shape.area();
+    }
+    return accum;
+}
+```
+
+This will work fine, so long as type `T` has `containsPoint` and `area` methods
+that satisfy the signature.[^also-interfaces]  These functions are short, and
+the signatures are simple, but what if the functions were more complicated?
+The larger the functions get, or the more complicated the interface, the more
+cognitive load we're going to put on consuming developers to understand the
+details of our function.  It also means that every time I change my
+implementation, that developer will need to re-read it to make sure the type
+contract hasn't changed.  Also, what if I didn't write the `Circle` type
+myself, and it uses different function names for `area` or `containsPoint`?
+
+[^also-interfaces]: also note that we could pass a `Shape` interface as type
+`T` and still be fine.
+
+These are classic duck typing problems, and part of why I'm not a huge fan of
+it for code at module seams.
+
+## Traits
+
+There is, however, a secret third way, which can be used to express type
+contracts at compile-time without paying the cost of dynamic dispatch.  It is
+arguably even simpler than an interface.  By adding a struct of comptime
+functions[^not-pointers], we can establish the contract of a type without
+incurring the runtime overhead of interfaces. Let's call this style of type
+function a **"trait"**[^keyword-traits].
+
+[^not-pointers]: *not function pointers*
+
+[^keyword-traits]: I got this idea from OCaml's *modules*, but we will call
+these ***traits*** because the term "module" is already used as part of Zig's
+build system.  Rust "traits" are pretty similar, but with other bells and
+whistles such as global trait resolution.  I toyed with calling them "STables"
+(for static tables, as opposed to virtual tables), but ultimately landed on
+"trait".
+
+
+```zig
+
+fn Shape(T: type) type {
+    return struct {
+        area: fn(T) f32,
+        containsPoint: fn(T, f32, f32) f32,
+    }
+}
+
+fn checkCollisions(
+    T: type, trait: Shape(T), shapes []const T, x: f32, y: f32) ?*T {
+    for (shapes) |*shape| {
+        if (trait.containsPoint(shape, x, y)) return shape;
+    }
+    return null;
+}
+
+fn totalArea(T: type, trait: Shape(T), shapes []const T) f32 {
+    var accum: = 0;
+    for (shapes) |shape| {
+        accum += trait.area(shape);
+    }
+    return accum;
+}
+
+```
+
+Then when the user implements their own circle type, they can expose it much as
+they do an interface.
+
+```zig
+const Circle = struct {
+    x: f32,
+    y: f32,
+    radius: f32,
+
+    const shape: Shape(Circle) = .{
+        .area = area,
+        .containsPoint = containsPoint
+    };
+
+    fn area(self: Circle) f32 {
+        return self.radius * self.radius;
+    }
+
+    fn containsPoint(self: Circle, x: f32, y: f32) bool {
+        const dx = self.x - x;
+        const dy = self.y - y;
+        return dx * dx + dy * dx < self.radius * self.radius;
+    }
+}
+```
+
+That's it.  A trait is just a type function (`fn Shape(T)`). An implementation
+is a value of the resulting type (`shape: Shape(Circle) = .{ ... }`). To my
+eye, this confers a number of benefits over the other approaches in scenarios
+where I want static dispatch.
+
+1. The performance and ergonomics are better than runtime interfaces.
+2. The interface contract is more explicit and visible than duck typing.
+
+We are just getting started though. If you have the odd proclivity for
+functional programming, you may also be starting to realize that this unlocks a
+world of possibilities.
+
+
+# Glorious Trait Functors
+
+Unlike rust or haskell, Ocaml does not have a global trait registry that
+figures out all the types a struct implements.  Instead, you must pass an OCaml
+module to a function that uses it.  Thus modules are a first-class concept in
+OCaml, much like types in Zig.  There is also no way to infer that a type
+implements a new trait based on others.  Instead, OCaml allows users to define
+functions that return new modules.
+
+To demonstrate, let use consider the case where we have an `Add` and `Negate`
+trait, and want to derive a `Subtract` trait.  In Haskell, this
+implementation can be derived and made available automatically.
+
+```haskell
+class Add a where
+  add :: a -> a -> a
+
+class Negate a where
+  neg :: a -> a
+
+class Subtract a where
+  sub :: a -> a -> a
+
+-- any type that can be added and negated can be subtracted.
+instance (Add a, Negate a) => Subtract a where
+  sub x y = add x (neg y)
+```
+
+Similarly in Rust:
+
+
+```rust
+trait Add {
+    fn add(self, other: Self) -> Self;
+}
+
+trait Negate {
+    fn negate(self) -> Self;
+}
+
+trait Subtract {
+    fn subtract(self, other: Self) -> Self;
+}
+
+// any type that can be added and negated can be subtracted.
+impl<T: Add + Negate> Subtract for T {
+    fn subtract(self, other: Self) -> Self {
+        self.add(other.negate())
+    }
+}
+```
+
+Now any type that implements Add and Negate will be able to infer its Subtract
+trait.  However with OCaml, you have to *pass* these implementations to a
+function that *returns* a Subtract implementation.  This function is called a
+***Module Functor***.
+
+```ocaml
+module type ADD = sig
+  type t
+  val add : t -> t -> t
+end
+
+module type NEGATE = sig
+  type t
+  val negate : t -> t
+end
+
+module type SUBTRACT = sig
+  type t
+  val subtract : t -> t -> t
+end
+
+module MakeSubtract (A : ADD) (N : NEGATE with type t = A.t) :
+  SUBTRACT with type t = A.t = struct
+  type t = A.t
+  let subtract x y = A.add x (N.negate y)
+end
+
+(* Nothing derives this for us: we must apply the rule by hand, naming both
+   the rule and the evidence it needs. *)
+module IntSubtract = MakeSubtract (IntAdd) (IntNegate)
+
+let () = Printf.printf "%d\n" (IntSubtract.subtract 10 3) (* 7 *)
+```
+
+Some would call this lack of trait inference a limitation, but it confers one
+major advantage: you always know *where* your implementation is coming from.
+In my experience this drastically reduces the number of head-scratching moments
+in Rust or Haskell where you are trying to figure out exactly what trait is
+being applied, or how it was derived.  I think this aligns closely with the Zig
+philosophy of zero hidden control flow - the source of a call is always
+explicit.  It also provides a template for how we can apply this technique to
+Zig.
+
+```zig
+fn Add(T: type) type {
+    return struct { add: fn(T, T) T };
+}
+
+fn Negate(T: type) type {
+    return struct { negate: fn(T) T };
+}
+
+fn Subtract(T: type) type {
+    return struct { subtract: fn(T, T) T };
+}
+
+fn MakeSubtract(
+    T: type,
+    A: Add(T),
+    N: Negate(T),
+) Subtract(T) {
+    return .{
+        .subtract = struct {
+            fn subtract(x: T, y: T) T {
+                return A.add(x, N.negate(y));
+            }
+        }.subtract,
+    };
+}
+
+const IntAdd: Add(i32) = .{
+    .add = struct { fn add(x: i32, y: i32) i32 { return x + y; }}.add,
+};
+
+const IntNegate: Negate(i32) = .{
+    .negate = struct { fn negate(x: i32) i32 { return -x; }}.negate,
+};
+
+const IntSubtract = MakeSubtract(i32, IntAdd, IntNegate);
+
+fn run() {
+    std.debug.print("{d}\n", .{IntSubtract.subtract(10, 3)});
+}
+```
+
+This is a toy example for the sake of brevity, but hopefully it is apparent how
+powerful this pattern can be.
 

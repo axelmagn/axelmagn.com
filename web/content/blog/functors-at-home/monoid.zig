@@ -3,7 +3,6 @@ fn Monoid(T: type) type {
         empty: T,
         combine: fn (T, T) T,
     };
-
 }
 
 fn Sum(T: type) Monoid(T) {

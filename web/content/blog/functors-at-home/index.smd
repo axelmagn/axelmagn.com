@@ -26,10 +26,9 @@ concepts.  For many in the Zig community, I expect them to already be de
 rigueur in your everyday code, and I do not think I can explain them better
 than others have done. For the sake of brevity, let us summarize it thusly:
 
-1. **Dynamic Polymorphism**: Opaque pointers, virtual tables, and dynamic
-   dispatch.
+1. **Interfaces**: Opaque pointers, virtual tables, and dynamic dispatch.
 2. **Static Polymorphism**: Type arguments, switch statements, and comptime
-   duck typing.
+duck typing.
 
 If you are coming from another strongly typed language, you would be forgiven
 for finding this state of affairs rather simplistic. This is perhaps by design
@@ -330,12 +329,9 @@ const Circle = struct {
 ```
 
 That's it.  A trait is just a type function (`fn Shape(T)`). An implementation
-is a value of the resulting type (`shape: Shape(Circle) = .{ ... }`). To my
-eye, this confers a number of benefits over the other approaches in scenarios
-where I want static dispatch.
-
-1. The performance and ergonomics are better than runtime interfaces.
-2. The interface contract is more explicit and visible than duck typing.
+is a value of the resulting type (`shape: Shape(Circle) = .{ ... }`).  Notice
+that unlike interfaces, there is no data attached.  It's just a bag of
+functions that know how to transform data of type T.
 
 We are just getting started though. If you have the odd proclivity for
 functional programming, you may also be starting to realize that this unlocks a
@@ -344,12 +340,17 @@ world of possibilities.
 
 # Glorious Trait Functors
 
+Traits as I have described above are directly inspired by modules in Ocaml.  To
+extend the power of traits, we can first study the parallels in OCaml.
+
 Unlike rust or haskell, Ocaml does not have a global trait registry that
-figures out all the types a struct implements.  Instead, you must pass an OCaml
-module to a function that uses it.  Thus modules are a first-class concept in
-OCaml, much like types in Zig.  There is also no way to infer that a type
+figures out all the types a struct implements.[^neither-zig]  Instead, you must
+pass an OCaml module to a function that uses it.  Thus modules are a
+first-class concept in OCaml.  There is also no way to infer that a type
 implements a new trait based on others.  Instead, OCaml allows users to define
-functions that return new modules.
+functions that return new modules (known as module functors).
+
+[^neither-zig]: neither does Zig
 
 To demonstrate, let use consider the case where we have an `Add` and `Negate`
 trait, and want to derive a `Subtract` trait.  In Haskell, this
@@ -479,6 +480,227 @@ fn run() {
 }
 ```
 
-This is a toy example for the sake of brevity, but hopefully it is apparent how
+This is a toy example for the sake of brevity, but hopefully it shows how
 powerful this pattern can be.
 
+## Observations
+
+Interfaces are often discussed in terms of "is-a" relationships.  By
+implementing an Allocator interface for a new type, we say that the type "is an
+Allocator".  With traits, it's more of a "there-is-a" relationship.  Traits are
+just bags of functions, and as such, when we have an `Add(i32)` trait, we are
+saying "there is an `add` function for i32 (and here it is)".  It may seem like
+a subtle distinction, but I think it's an important one.  The type itself
+remains conceptually separate from the things you can do with it (the traits on
+it).
+
+Also notice that traits are inherently comptime-centric.  They provide no
+facilities for runtime polymorphism.  This is intentional.  This entire
+exercise came from me wondering how to declare interfaces and abstractions in a
+way that was more compiler-friendly than vtables and interfaces.
+
+
+# Example: Streaming
+
+To make these concepts more concrete, let's tackle a common abstraction task in
+other languages: streaming.  You have some type, and one way or another it can
+be thought of as a stream of values.  You want to define a bunch of functions
+that accept a stream, without being aware of the implementation details.
+
+Let's start by defining the root trait.
+
+```zig
+fn Stream(T: type, V: type) type {
+    return struct { next: fn(*T) ?V };
+}
+```
+
+Armed with this, we can start to define our implementations.  For the sake of
+example, let's start with a stepped range.
+
+```zig
+/// example: (2, 15, 3) -> 2, 5, 8, 11, 14
+const StepRange = struct {
+    current: i64,
+    end: i64,
+    step: i64,
+
+    const stream: Stream(StepRange, i64) = .{ .next = next };
+
+    fn next(self: *StepRange) ?i64 {
+        if (self.current < self.end) {
+            defer self.current += self.step;
+            return self.current;
+        } else {
+            return null;
+        }
+    }
+};
+```
+
+One implementation hardly makes for an abstraction layer, so let's also
+implement an iterator over a buffer.
+
+```zig
+fn BufIter(T: type) type {
+    return struct {
+        buf: []T,
+        idx: usize = 0,
+
+        const stream: Stream(@This(), T) = .{ .next = next };
+
+        fn next(self: *@This()) ?T {
+            if (self.idx < self.buf.len) {
+                defer self.idx += 1;
+                return self.buf[self.idx];
+            }
+            return null;
+        }
+    };
+}
+```
+
+With these implementations in place, one of the simplest operations we could run on a stream would be to print its elements.  Let's start there.
+
+```zig
+pub fn main() void {
+    var range = StepRange{ .current = 2, .end = 15, .step = 3 };
+    while (StepRange.stream.next(&range)) |value| {
+        std.debug.print("{d}\n", .{value});
+    }
+}
+```
+
+This prints about what we'd expect.[^streams2.zig]
+
+[^streams2.zig]: [full listing](https://godbolt.org/z/6TWKobWK5)
+
+```
+2
+5
+8
+11
+14
+```
+
+## Adding Streaming Methods
+
+Streaming libraries aren't much good without functions that operate on streams,
+so let's build a few of those first.  We'll start with `filter`.
+
+```zig
+
+fn filter(
+    T: type,
+    V: type,
+    stream: Stream(T, V),
+    f: fn(V) bool
+) Stream (T, V) {
+    return .{ .next = struct {
+        fn next(self: *T) ?V {
+            while (true) {
+                const value = stream.next(self);
+                if (value == null) return null;
+                if (f(value.?)) return value;
+            }
+        }
+    }.next };
+}
+```
+
+There's nothing wrong with this, but if we have a function with any more type
+parameters it's going to get a little tedious.  Instead, let's put it in the
+Stream constructor, where T and V are already in-scope.
+
+```zig
+
+fn Stream(T: type, V: type) type {
+    return struct {
+        next: fn (*T) ?V,
+
+        fn filter(stream: @This(), f: fn (V) bool) @This() {
+            return .{ .next = struct {
+                fn next(self: *T) ?V {
+                    while (stream.next(self)) |value| {
+                        if (f(value)) return value;
+                    }
+                    return null;
+                }
+            }.next };
+        }
+    };
+}
+```
+
+It is equally simple and useful to add `map` and `reduce` functions, so let's
+add those in the same way.
+
+```zig
+
+// inside of Stream
+fn map(stream: @This(), Out: type, f: fn (V) Out) Stream(T, Out) {
+    return .{ .next = struct {
+        fn next(self: *T) ?Out {
+            return if (stream.next(self)) |value| f(value) else null;
+        }
+    }.next };
+}
+
+fn reduce(
+    stream: @This(),
+    Out: type,
+    self: *T,
+    init: Out,
+    f: fn (Out, V) Out,
+) Out {
+    var accum = init;
+    while(stream.next(self)) |value| {
+        accum = f(accum, value);
+    }
+    return accum;
+}
+```
+
+With a more interesting API exposed, we can run a more interesting calculation
+on a stream.  Let's start with the range we defined before, filter it down to
+just the odd numbers, divide each one by half, and then sum the result.
+
+```zig
+pub fn main() void {
+    const funcs = struct {
+        fn odd(x: i64) bool {
+            return @mod(x, 2) == 1;
+        }
+        fn half(x: i64) f64 {
+            return @as(f64, @floatFromInt(x)) / 2;
+        }
+        fn sum(x: f64, y: f64) f64 {
+            return x + y;
+        }
+    };
+
+    var range = StepRange{ .current = 2, .end = 15, .step = 3 };
+    const result = StepRange.stream         // 2, 5, 8, 11, 14
+        .filter(funcs.odd)                  // -> 5, 11
+        .map(f64, funcs.half)               // -> 2.5, 5.5
+        .reduce(f64, &range, 0, funcs.sum); // -> 8
+    std.debug.print("{d}\n", .{result}); 
+}
+```
+
+Running this, we can confirm that it prints the expected value.
+
+```
+8
+```
+
+We could of course extend the streaming API much further with these tools, but
+I will leave off here for now.  Hopefully this gives a good idea of what it is
+like to use this style of programming in practice.
+
+# Higher Kinded Types
+
+I could leave off here and this would probably be all you need to work
+effectively with traits in Zig.  This is already a strong framework for
+declaring and implementing contracts between types, and it more than satisfies
+my needs in working with everyday projects.

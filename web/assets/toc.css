@@ -1,0 +1,69 @@
+/* Table of contents for posts. Built by toc.js; load after sidenotes.css. */
+
+.post-body h2 { scroll-margin-top: 1.5rem; }
+
+/* Default (narrow screens): collapsible box at the top of the article */
+.toc details {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--standard-border-radius);
+  background: var(--accent-bg);
+  padding: 0.5rem 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+.toc summary { cursor: pointer; font-weight: bold; color: var(--text-light); }
+.toc ol { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+.toc li { margin: 0.25rem 0; }
+.toc a { text-decoration: none; color: var(--text-light); }
+.toc a:hover,
+.toc a[aria-current] { color: var(--accent); }
+
+/* Wide screens: float in the left margin and stay in view while scrolling */
+@media (min-width: 80rem) {
+  /* Re-center the article column with room on both sides (TOC left, sidenotes right) */
+  body { grid-template-columns: minmax(16rem, 1fr) min(45rem, 90%) minmax(18rem, 1fr) 0; }
+  main { position: relative; }
+
+  .toc {
+    position: absolute;           /* spans the full height of <main>... */
+    top: 4rem; bottom: 0;         /* start level with the article title */
+    right: calc(100% + 2rem);
+    width: 13rem;
+  }
+  .toc details {
+    position: sticky;             /* ...so the list can stick inside it */
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .toc summary {
+    pointer-events: none;         /* can't collapse it while it's a sidebar */
+    list-style: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .toc summary::-webkit-details-marker { display: none; }
+  .toc ol {
+    list-style: none;
+    padding-left: 0;
+    border-left: 2px solid var(--border);
+  }
+  .toc li { margin: 0; }
+  .toc a {
+    display: block;
+    padding: 0.2rem 0 0.2rem 0.75rem;
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+  }
+  .toc a[aria-current] { border-left-color: var(--accent); }
+}

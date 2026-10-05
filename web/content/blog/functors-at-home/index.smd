@@ -37,6 +37,11 @@ typeclasses, there appears to be no ready equivalent in Zig. I will argue that,
 with a little adaptation, Rust's traits and Ocaml's modules can in fact be
 expressed perfectly elegantly in Zig userland.
 
+I would like to put forward a new **convention** for defining type contracts in
+Zig.  It doesn't require any libraries or machinery - in fact if fits
+remarkably well into vanilla Zig.  It is inspired by the functional programming
+world in general, and OCaml in particular.
+
 So as not to bury the lead, let me begin with a brief example.
 
 ```zig
@@ -688,7 +693,17 @@ pub fn main() void {
 }
 ```
 
-Running this, we can confirm that it prints the expected value.
+Notice that the range is not passed to the stream until the `reduce` function
+is called.  This was not by any sort of particular design, but it's just how
+the signatures worked out.  I have found this to be a common pattern in trait
+programming: many functions that would typically operate on data instead
+transform the trait itself, with data being passed fairly late in the call
+chain.  It's not good or bad, just a little different to what I see in other
+languages.
+
+Running this, we can confirm that it prints the expected value.[^streams3.zig]
+
+[^streams3.zig]: [full listing](https://godbolt.org/z/Wxh4sYffv).
 
 ```
 8
@@ -700,7 +715,150 @@ like to use this style of programming in practice.
 
 # Higher Kinded Types
 
-I could leave off here and this would probably be all you need to work
-effectively with traits in Zig.  This is already a strong framework for
-declaring and implementing contracts between types, and it more than satisfies
-my needs in working with everyday projects.
+What we have discussed so far is probably all you need to work effectively with
+traits in Zig.  At the very least, I have found it to be a very *enjoyable*
+way of programming, which allows me to be more explicit with my type contracts
+at comptime.
+
+However the functional programming perverts among you may be asking: *how far
+can you go with this?*  Quite far, dear reader. The syntax is admittedly
+clunkier than Haskell or OCaml, but the mechanisms seem to be there.
+
+Haskell and Scala programmers will tell you that one of the more pleasing parts
+of their type systems are "Higher Kinded Types".[^dreimanis2022] The linked
+article puts it thusly:
+
+> "Kinds are to types what types are to values."
+
+This is a bit of a head scratcher, but it helpfully goes on to state that every
+type declaration is in fact a type constructor, and it has a "kind" that can be written:
+
+```haskell
+*
+* -> *
+* -> * -> *
+
+-- or alternatively
+
+Type
+Type -> Type
+Type -> Type -> Type
+```
+
+For example Haskell has an `Either` type, which is defined:
+
+```haskell
+data Either a b = Left a | Right b
+-- kind of Maybe: Type -> Type -> Type
+```
+
+Observe that in Zig, the equivalent is just a function on types, and it exactly
+matches the kind signature from Haskell.
+
+```zig
+fn Either(A: type, B: type) type {
+    return union(enum) {
+        left: A,
+        right: B,
+    }
+}
+```
+
+What are higher kinded types then?  Again we will refer to the article by
+Dreimanis.
+
+> "Higher-kinded types are types with kind signatures that have parenthesis
+> somewhere on the left side, like this: `(* -> *) -> * -> *`."
+
+The example they provide is a `Collection`, which takes a type constructor and
+an inner type.
+
+```haskell
+data Collection f a = Collection (f a) deriving (Show)
+-- kind: (* -> *) -> * -> *
+
+a :: Collection [] Int
+a = Collection [1,2,3]
+
+b :: Collection [] String
+b = Collection ["call", "me", "ishmael"]
+
+c :: Collection Maybe String
+c = Collection (Just "whale")
+```
+
+Zig has no problems with functions on types, so translating this example
+remains straightforward.
+
+```zig
+
+fn Collection(F: fn(type) type, A: type) type {
+    return struct {
+        collection: F(A),
+    };
+}
+
+const A = Collection(ArrayList, i32);
+const B = Collection(ArrayList, []const u8);
+// assuming we've implemented Maybe somewhere
+const C = Collection(Maybe, []const u8); 
+```
+
+Look at that!  Higher kinded types in Zig.  The fact that types are first-class
+at comptime ends up being all you need for this to fall out naturally.  This
+toy example isn't very useful yet, but let's see what we can do by applying
+some classic higher kinded types from other languages to Zig..
+
+# The Other Kind of Functors
+
+Haskell[^haskell-functor] and Scala[^scala-functor] make heavy use of the
+`Functor` design pattern, which is basically a generalized way of declaring
+that a container  exposes a `map` function.  Note that this is a **slightly
+different concept** from module functors in OCaml, which we used above to
+derive trait functors in Zig.[^different-name]  Again, we will start with the
+Haskell definition and translate it to Zig.
+
+[^dreimanis2022]: Further reading: [Kinds and Higher Kinded Types in
+Haskell](https://serokell.io/blog/kinds-and-hkts-in-haskell) by Gints Dreimanis
+
+[^haskell-functor]: [Haskell Functors](https://wiki.haskell.org/index.php?title=Functor)
+
+[^scala-functor]: [Scala Functors](https://dcapwell.github.io/scala-tour/Functor.html)
+
+[^different-name]: We should probably figure out a different name for trait
+functors if we are going to also have a trait called "Functor".  Maybe "trait
+derivations" or "trait functions"?
+
+```haskell
+class Functor f where
+    fmap :: (a -> b) f a -> f b
+
+-- Same function, different containers
+fmap (+1) [1, 2, 3]          -- [2,3,4]
+fmap (+1) (Just 5)           -- Just 6
+fmap (+1) Nothing            -- Nothing
+fmap (+1) (Right 5)          -- Right 6
+```
+
+This one's a little bit trickier. Let's start simple, and declare a `Maybe`
+datatype with an `fmap` implementation. We'll declare the `fmap` function
+outside of the `Maybe`, just so that we are clear on the types it needs to be
+parameterized by.
+
+```zig
+fn Maybe(T: type) type {
+    return union(enum) {
+        nothing,
+        just: T,
+    };
+}
+
+fn fmapMaybe(A: type, B: type, f: fn (A) B, maybe: Maybe(A)) Maybe(B) {
+    return switch (maybe) {
+        .nothing => .nothing,
+        .just => |val| .{ .just = f(val) },
+    };
+}
+```
+
+

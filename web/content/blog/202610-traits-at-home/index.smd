@@ -27,8 +27,8 @@ rigueur in your everyday code, and I do not think I can explain them better
 than others have done. For the sake of brevity, let us summarize it thusly:
 
 1. **Interfaces**: Opaque pointers, virtual tables, and dynamic dispatch.
-2. **Static Polymorphism**: Type arguments, switch statements, and comptime
-duck typing.
+2. **Duck Typing**: Type arguments, switch statements, and comptime
+monomorphism.
 
 If you are coming from another strongly typed language, you would be forgiven
 for finding this state of affairs rather simplistic. This is perhaps by design
@@ -1420,10 +1420,18 @@ Just like that, we have monads in Zig.
 # Conclusions and Remarks
 
 I want to be very clear: I am **not** telling you to put functors and monads
-into your zig code.  I'm not sure that higher-kinded functional programming is
+into your Zig code.  I'm not sure that higher-kinded functional programming is
 a good fit for this language.  Instead, I hope I have impressed on you as a
 reader how *powerful* the trait design pattern is.  I have found it to be a
 both useful and pleasant way to organize my code.
+
+I think that part of why you don't see traits around in Zig is because they are
+non-obvious, and even if there was some fancy framework for them, Zig users
+don't seem that keen on complicated dependencies.  They are better suited as a
+design pattern: just a thing you do to keep your code modular.  I think that's
+part of the beauty of Zig, and the beauty of traits - you don't need more fancy
+language features or a metaprogramming library.  You already have what you need
+right out of the box.
 
 At a deeper level, even if you decide traits aren't for you, I hope this
 convinces you to find more ways **decouple your data and types from your

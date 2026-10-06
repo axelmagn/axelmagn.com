@@ -24,21 +24,28 @@
 			<h1 class="site-title" :text="$site.title"></h1>
 			<nav>
 				<a class="$site.page('').isCurrent().then('current')" href="$site.page('').link()">Home</a>
-				&nbsp; • &nbsp;
-				<a class="$site.page('about').isCurrent().then('current')" href="$site.page('about').link()">About</a>
-				&nbsp; • &nbsp;
+				<!-- &nbsp; • &nbsp; -->
+				<!--<a class="$site.page('about').isCurrent().then('current')" href="$site.page('about').link()">About</a>-->
+				<!-- &nbsp; • &nbsp; -->
+				<!--
 				<a class="$page.link().startsWith($site.page('blog').link()).then('current')" href="$site.page('blog').link()">Blog</a>
+				-->
+				<!-- &nbsp; • &nbsp; -->
+				<!--
 				<ctx :if="$site.page('devlog').subpages().first?()">
 					&nbsp; • &nbsp;
 					<a class="$page.link().startsWith($site.page('devlog').link()).then('current')" href="$if.link()">Devlog</a>
 				</ctx>
+				-->
 			</nav>
 		</header>
 		<super>
+		<!--
 		<footer>
 			<hr>
 			<h5>SITE UNDER CONSTRUCTION</h5>
 			<img src="$site.asset('under-construction.gif').link()" width=90>
 		</footer>
+		-->
 	</body>
 </html>

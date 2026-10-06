@@ -1,5 +1,5 @@
 ---
-.title = "We Have Functors at Home",
+.title = "We Have Traits at Home",
 .date = .date("2026-10-03"),
 .layout = "post.shtml",
 .authors = ["Axel Magnuson"],
@@ -78,6 +78,10 @@ programming capabilities, but it works just as well with everyday interfaces -
 storage, algebra, writers, anything where you want to declare a generic
 abstraction.
 
+I don't think I'm the first person to stumble onto this style in Zig, but it's
+new to me, and I want to make the case that it is a powerful and elegant way to
+architect your code.
+
 [^seguin2023]: [Zig Interfaces](https://www.openmymind.net/Zig-Interfaces/)
 by Karl Seguin
 
@@ -129,12 +133,13 @@ explicit."  I don't have any beef with that.  In fact, I can't think of a
 better way to solve that particular problem.  However in the general case, I
 think we can do better.
 
-Instead, let's think in terms of just **data** and **functions** that transform
-that data.  When I declare a trait in Rust or a module signature in OCaml, I am
-really declaring a type that describes a set of function signatures, made
-generic over a type that has not yet been specified.  Then an implementation is
-a value of this type.  Both the trait/signature and the implementation are
-available at comptime.  Thankfully, Zig already has facilities for all of this.
+Instead, let's think in terms of just **data**, **types**, and **functions**
+that transform those data or types.  When I declare a trait in Rust or a module
+signature in OCaml, I am really declaring a type that contains a set of
+functions, made generic over a type that has not yet been specified. Then an
+implementation is a value of this type.  Both the trait/signature and the
+implementation are available at comptime.  Thankfully, Zig already has
+facilities for all of this.
 
 ## Interfaces
 
@@ -261,14 +266,22 @@ myself, and it uses different function names for `area` or `containsPoint`?
 These are classic duck typing problems, and part of why I'm not a huge fan of
 it for code at module seams.
 
+Perhaps more importantly, duck typing will always necessitate the binding of
+our functions to our data.  The example above only works if type `T` has
+`containsPoint` and `area` methods bound to it.  Fundamentally, even at
+comptime, duck typing can only encode expectations that are *intrinsic* to the
+type itself.  It pushes us to write in a style that declares methods within our
+structs, rather than functions that operate on data.
+
+
 ## Traits
 
 There is, however, a secret third way, which can be used to express type
 contracts at compile-time without paying the cost of dynamic dispatch.  It is
-arguably even simpler than an interface.  By adding a struct of comptime
-functions[^not-pointers], we can establish the contract of a type without
-incurring the runtime overhead of interfaces. Let's call this style of type
-function a **"trait"**[^keyword-traits].
+arguably even simpler than an interface, and more powerful than duck typing.
+By adding a struct of comptime functions[^not-pointers], we can establish the
+contract of a type without incurring the runtime overhead of interfaces. Let's
+call this style of type function a **"trait"**[^keyword-traits].
 
 [^not-pointers]: *not function pointers*
 
@@ -437,11 +450,11 @@ let () = Printf.printf "%d\n" (IntSubtract.subtract 10 3) (* 7 *)
 Some would call this lack of trait inference a limitation, but it confers one
 major advantage: you always know *where* your implementation is coming from.
 In my experience this drastically reduces the number of head-scratching moments
-in Rust or Haskell where you are trying to figure out exactly what trait is
-being applied, or how it was derived.  I think this aligns closely with the Zig
-philosophy of zero hidden control flow - the source of a call is always
-explicit.  It also provides a template for how we can apply this technique to
-Zig.
+that you would have in Rust or Haskell where you are trying to figure out
+exactly what trait is being applied, or how it was derived.  I think this
+aligns closely with the Zig philosophy of zero hidden control flow - the source
+of a call is always explicit.  It also provides a template for how we can apply
+this technique to Zig.
 
 ```zig
 fn Add(T: type) type {
@@ -507,16 +520,31 @@ fn impl(comptime Sig: type, comptime M: type) Sig {
 Armed with this, we can declare implementations a little more ergonomically.
 
 ```zig
-const IntAdd: = impl(Add(i32), struct {
+const IntAdd = impl(Add(i32), struct {
      pub fn add(x: i32, y: i32) i32 { return x + y; }
-})
+});
 
-const IntNegate: impl(Negate(i32), struct {
+const IntNegate = impl(Negate(i32), struct {
     pub fn negate(x: i32) i32 { return -x; }
 
 });
-
 ```
+
+Now we can define a generic function that works on any type that implements a
+subtract trait.
+
+```zig
+fn subtractTwo(T: type, value: T, subtract: Subtract(T)) T {
+  // technically we should also have a FromComptime trait to convert 2 into T,
+  // but I'm going to cheat and omit it.  this example will still work fine.
+  return subtract.subtract(value, 2);
+}
+
+fn run() i32 {
+    return subtractTwo(i32, 42, IntSubtract); // 40
+}
+```
+
 This is a toy example for the sake of brevity, but hopefully it shows how
 powerful this pattern can be.
 
@@ -532,9 +560,12 @@ remains conceptually separate from the things you can do with it (the traits on
 it).
 
 Also notice that traits are inherently comptime-centric.  They provide no
-facilities for runtime polymorphism.  This is intentional.  This entire
-exercise came from me wondering how to declare interfaces and abstractions in a
-way that was more compiler-friendly than vtables and interfaces.
+facilities for runtime polymorphism.  This entire exercise came from me
+wondering how to declare interfaces and abstractions in a way that was more
+compiler-friendly than vtables and interfaces.  I'm sure that there is some way
+to write a convenience function that converts a trait to a vtable, but I
+haven't had to write it yet because when I use traits, I end up writing
+relatively few runtime interfaces.
 
 
 # Example: Streaming
@@ -544,16 +575,20 @@ other languages: streaming.  You have some type, and one way or another it can
 be thought of as a stream of values.  You want to define a bunch of functions
 that accept a stream, without being aware of the implementation details.
 
-Let's start by defining the root trait.
+Let's start by defining the root trait.  We will keep it simple, and say that a
+stream is a type `T` for which there is an output type `V` and a `next`
+function that takes in a `*T` pointer and optionally returns a value `?V`.
 
 ```zig
 fn Stream(T: type, V: type) type {
-    return struct { next: fn(*T) ?V };
+    return struct {
+        next: fn(*T) ?V,
+    };
 }
 ```
 
-Armed with this, we can start to define our implementations.  For the sake of
-example, let's start with a stepped range.
+Now we can start to define our implementations.  For the sake of example, let's
+start with a stepped range.
 
 ```zig
 /// example: (2, 15, 3) -> 2, 5, 8, 11, 14
@@ -597,7 +632,8 @@ fn BufIter(T: type) type {
 }
 ```
 
-With these implementations in place, one of the simplest operations we could run on a stream would be to print its elements.  Let's start there.
+With these implementations in place, one of the simplest operations we could
+run on a stream would be to print its elements.  Let's start there.
 
 ```zig
 pub fn main() void {
@@ -698,9 +734,10 @@ fn reduce(
 }
 ```
 
-With a more interesting API exposed, we can run a more interesting calculation
-on a stream.  Let's start with the range we defined before, filter it down to
-just the odd numbers, divide each one by half, and then sum the result.
+With `filter`, `map`, and `reduce` implemented, we can run a more interesting
+calculation on a stream.  Let's start with the range we defined before, filter
+it down to just the odd numbers, divide each one by half, and then sum the
+result.
 
 ```zig
 pub fn main() void {
@@ -841,14 +878,15 @@ at comptime ends up being all you need for this to fall out naturally.  This
 toy example isn't very useful yet, but let's see what we can do by applying
 some classic higher kinded types from other languages to Zig..
 
-# The Other Kind of Functors
+# The Other Kind of Functor
 
 Haskell[^haskell-functor] and Scala[^scala-functor] make heavy use of the
 `Functor` design pattern, which is basically a generalized way of declaring
 that a container  exposes a `map` function.  Note that this is a **slightly
 different concept** from module functors in OCaml, which we used above to
-derive trait functors in Zig.[^different-name]  Again, we will start with the
-Haskell definition and translate it to Zig.
+derive trait functors in Zig.[^different-name]  It actually comes from a formal
+concept in category theory, but that's far beyond the scope of this article.
+Again, we will start with the Haskell definition and translate it to Zig.
 
 [^dreimanis2022]: Further reading: [Kinds and Higher Kinded Types in
 Haskell](https://serokell.io/blog/kinds-and-hkts-in-haskell) by Gints Dreimanis
@@ -873,9 +911,12 @@ fmap (+1) (Right 5)          -- Right 6
 ```
 
 This one's a little bit trickier. Let's start simple, and declare a `Maybe`
-datatype with an `fmap` implementation. We'll declare the `fmap` function
-outside of the `Maybe`, just so that we are clear on the types it needs to be
-parameterized by.
+datatype with an `fmap` implementation.  `Maybe` is the haskell equivalent of
+an optional.  It's a good, simple type that is useful for demonstrating a
+number of functional programming techniques. We'll declare it explicitly rather
+than using Zig optionals, just so that we can play with it more explicitly.
+We'll also declare the `fmap` function outside of the `Maybe`, just so that we
+are clear on the types it needs to be parameterized by.
 
 ```zig
 fn Maybe(T: type) type {
@@ -896,10 +937,12 @@ fn fmapMaybe(A: type, B: type, f: fn (A) B, maybe: Maybe(A)) Maybe(B) {
 Unfortunately, we start to hit the limits of that the Zig type system can
 express.  In an ideal world, we would want our generic fmap signature to look
 something like `fn (A: type, B: type, fn(A) B, F(A)) F(B)`.  However if we try
-to write this, we will find that it is not a valid type signature, and if we
-probe the type of `fmapMaybe` using `@typeInfo`, we will see it represented as
-`fn (type, type, anytype, anytype) anytype`.  So far I have yet to find a
-viable way to represent these type constraints in a generic signature.  Therefore we must resort to a bit of trickery in order to declare our Functor trait.
+to write this, we will find that it is not a valid type signature for a struct
+field, and if we probe the type of `fmapMaybe` using `@typeInfo`, we will see
+it represented as `fn (type, type, anytype, anytype) anytype`.  So far I have
+yet to find a viable way to represent these type constraints in a generic
+signature. Therefore we must resort to a bit of tricksy metaprogramming in
+order to specify our `fmap` signature in the trait struct.
 
 ```zig
 fn Functor(F: fn (type) type) type {
@@ -919,8 +962,8 @@ fn Functor(F: fn (type) type) type {
 ```
 
 We can then use the techniques we have already explored to implement `Functor`
-on `Maybe`.  Because `Maybe` is a function, we will
-need to declare the implementation as a separate constant.
+on `Maybe`.  Because `Maybe` is a function, we will need to declare the
+implementation as a separate constant.
 
 ```zig
 const maybe_functor = impl(Functor(Maybe), struct {
@@ -933,7 +976,9 @@ const maybe_functor = impl(Functor(Maybe), struct {
 });
 ```
 
-If we want to, we could also declare it inside of the struct that `Maybe` returns.  It's a little funky because `fmap` is technically less specified than the concrete type itself, but it works out to be pretty ergonomic in practice.
+If we want to, we could also declare it inside of the struct that `Maybe`
+returns.  It's a little funky because `fmap` is technically less specified than
+the concrete type itself, but it works out to be pretty ergonomic in practice.
 
 ```zig
 fn Maybe(T: type) type {
@@ -954,7 +999,8 @@ fn Maybe(T: type) type {
 }
 ```
 
-Let's test it on a simple function that adds 2.5 to an integer, casting it to a float.
+Let's test it on a simple function that adds 2.5 to an integer, casting it to a
+float.
 
 ```zig
 fn addTwoPointFive(x: i32) f32 {
@@ -979,7 +1025,10 @@ This gives us what we would expect.
 ```
 
 Voila! Higher kinded types in Zig.  A little awkward, sure, but perfectly
-viable.  Let's use this to define a function that works with any functor. `withResult` is a function that applies an `fmap`, but rather than just injecting the output of the mapper, it creates a tuple that pairs the input with the output.
+viable.  Let's use this to define a function that works with any functor.
+`withResult` is a function that applies an `fmap`, but rather than just
+injecting the output of the mapper, it creates a tuple that pairs the input
+with the output.
 
 ```zig
 fn withResult(
@@ -1065,12 +1114,323 @@ We've made it this far, so I couldn't help but go for the big one: Monads.  For
 the uninitiated, they have attained a sort of cult status within functional
 programming due to both their incredible power and their similarity to
 burritos.  I will not try to explain monads here.  That would likely be its own
-article.  However, assuming you are familiar, let's see if we can implement
-them.  I will base my implementation off of Scala, which I find to have a
-slightly more legible definition.
+article.  I also **do not want to advocate** for monads in Zig code.  I'm not
+sure that they're a good fit for this language.  They're just an interesting,
+advanced trait.
+
+However, assuming you are familiar and curious, let's see if we can implement
+them.  I will base my implementations off of haskell again, for the sake of
+consistency. 
+
+```haskell
+class Monad m where
+  pure    :: a -> m a
+  flatMap :: m a -> (a -> m b) -> m b
+```
+
+Two of the simplest Monads are `Maybe` and `Either` (corresponding to Zig
+optionals and results respectively). Lots of other things, including
+collections are also monads, but for the sake of simplicity I don't want to get
+into that business.
+
+```haskell
+-- Maybe: a value that might be absent
+data Maybe a = Nothing | Just a
+
+instance Monad Maybe where
+  pure a = Just a
+
+  flatMap (Just a) f = f a
+  flatMap Nothing  _ = Nothing
+
+
+-- Either: a value, or an error describing why there isn't one
+data Either e a = Left e | Right a
+
+instance Monad (Either e) where
+  pure a = Right a
+
+  flatMap (Right a) f = f a
+  flatMap (Left e)  _ = Left e
+```
+
+
+As we did with functors, let's start with the `Maybe` datatype and figure out
+how we would implement this interface, then use that to define our `Monad`
+trait.
 
 ```zig
+fn Maybe(T: type) type {
+    return union(enum) {
+        nothing,
+        just: T,
 
+        const monad = monad_impl;
+    };
+}
+
+fn pure(A: type, a: A) Maybe(A) {
+    return .{ .just = a };
+}
+
+fn flatMap(
+    A: type,
+    B: type,
+    value: Maybe(A),
+    f: fn (A) Maybe(B),
+) Maybe(B) {
+    return switch (value) {
+        .nothing => .nothing,
+        .just => |a| f(a),
+    };
+}
+```
+
+This gives us a pretty solid idea of what a `Monad` needs to look like.  It is
+a higher kinded type, so we will need to use the same metaprogramming trick for
+its function signatures.
+
+```zig
+fn Monad(M: fn (type) type) type {
+    return struct {
+        pure: Pure,
+        flatMap: FlatMap,
+
+        const Pure = @TypeOf(struct {
+            fn pure(A: type, a: A) M(A) {
+                _ = a;
+                unreachable;
+            }
+        }.pure);
+
+        const FlatMap = @TypeOf(struct {
+            fn flatMap(A: type, B: type, value: M(A), f: fn (A) M(B)) M(B) {
+                _ = value;
+                _ = f;
+                unreachable;
+            }
+        }.flatMap);
+    };
+}
+```
+
+I'll also wrap the functions we have already defined into a monad
+implementation, and bind it inside of the `Maybe` types we create.
+
+```zig
+fn Maybe(T: type) type {
+    return union(enum) {
+        nothing,
+        just: T,
+
+        const monad = maybe_monad;
+    };
+}
+
+const maybe_monad = impl(Monad(Maybe), struct {
+    pub fn pure(A: type, a: A) Maybe(A) {
+        return .{ .just = a };
+    }
+
+    pub fn flatMap(
+        A: type,
+        B: type,
+        value: Maybe(A),
+        f: fn (A) Maybe(B),
+    ) Maybe(B) {
+        return switch (value) {
+            .nothing => .nothing,
+            .just => |a| f(a),
+        };
+    }
+});
+```
+
+Let's go ahead and tackle `Either` as well.  `Either` is a little funky,
+because it takes two type arguments and thus cannot be a monad in its bare
+form.  It only makes sense once you fix one of the type arguments
+(traditionally the left one), making it a single-argument type function.  This
+is usually used in other languages to represent a value that can be an error or
+a result, much like zig's result types.  This is how we'lll use it as well.
+
+```zig
+fn Either(A: type, B: type) type {
+    return union(enum) {
+        left: A,
+        right: B,
+
+        const EitherA = struct {
+            fn F(B_: type) type {
+                return Either(A, B_);
+            }
+        }.F;
+
+        const monad = impl(Monad(EitherA), struct {
+            pub fn pure(B_: type, b: B_) EitherA(B_) {
+                return .{ .right = b };
+            }
+
+            pub fn flatMap(
+                B_: type,
+                C: type,
+                value: EitherA(B_),
+                f: fn (B_) EitherA(C),
+            ) EitherA(C) {
+                return switch (value) {
+                    // left indicates an error, so we short-circuit
+                    // and don't apply any more functions.
+                    .left => |a| .{ .left = a },
+                    .right => |b| f(b),
+                };
+            }
+        });
+    };
+}
+```
+
+For our application of monads, let's keep it exceedingly simple.  We'll just
+define a `chain2` function that chains two functions together over a monad.  It
+will be very explicit with its types.  We could clean it up and make it more
+ergonomic by loosening our monad signatures, but for the sake of clarity I have
+chosen not to do that.  HKTs and monads are complicated enough to reason about
+without implicit parameters.
+
+```zig
+fn chain2(
+    M: fn (type) type,
+    A: type,
+    B: type,
+    C: type,
+    monad: Monad(M),
+    x: A,
+    f: fn (A) M(B),
+    g: fn (B) M(C),
+) M(C) {
+    const start = monad.pure(A, x);
+    const y: M(B) = monad.flatMap(A, B, start, f);
+    const z: M(C) = monad.flatMap(B, C, y, g);
+    return z;
+}
+```
+
+`Maybe` and `Either` are both traditionally used to represent the possibility
+of failure (returning null or an error respectively), so let's use chain to
+parse a string into an integer, and then invert it by dividing 1 by that value.
+We need to worry about the edge cases where either the string can't be parsed,
+or the value is zero and thus we cannot divide by it.
+
+We will need different parsing and inverting functions depending on whether we
+are using a `Maybe` or a `Either`, but they are conceptually similar.  If you
+are thinking that this sounds an awful lot like a trait, you would be correct.
+Let's define a convenience trait to capture this operation.
+
+```zig
+fn ParseInvert(T: fn (type) type) type {
+    return struct {
+        parse: fn ([]const u8) T(i32),
+        invert: fn (i32) T(f32),
+        monad: Monad(T),
+
+        fn chain(self: @This(), value: []const u8) T(f32) {
+            return chain2(
+                T,
+                []const u8,
+                i32,
+                f32,
+                self.monad,
+                value,
+                self.parse,
+                self.invert,
+            );
+        }
+    };
+}
+```
+
+Then we can implement it for `Maybe` and `Either`.
+
+```zig
+const maybe_parse_invert = impl(ParseInvert(Maybe), struct {
+    pub fn parse(s: []const u8) Maybe(i32) {
+        return if (std.fmt.parseInt(i32, s, 10)) |value|
+            .{ .just = value }
+        else |_|
+            .nothing;
+    }
+
+    pub fn invert(x: i32) Maybe(f32) {
+        return if (x == 0)
+            .nothing
+        else
+            .{ .just = 1 / @as(f32, @floatFromInt(x)) };
+    }
+
+    pub const monad = Maybe(undefined).monad;
+});
+
+const EitherErr = Either(anyerror, undefined).EitherA;
+
+const either_parse_invert = impl(ParseInvert(EitherErr), struct {
+    pub fn parse(s: []const u8) EitherErr(i32) {
+        return if (std.fmt.parseInt(i32, s, 10)) |value|
+            .{ .right = value }
+        else |err|
+            .{ .left = err };
+    }
+
+    pub fn invert(x: i32) EitherErr(f32) {
+        return if (x == 0)
+            .{ .left = error.divide_by_zero }
+        else
+            .{ .right = 1 / @as(f32, @floatFromInt(x)) };
+    }
+
+    pub const monad = EitherErr(undefined).monad;
+});
+```
+
+All that is left to do now is run it and see whether it works.
+
+```zig
+pub fn main() !void {
+    std.debug.print("{any}\n", .{maybe_parse_invert.chain("4")});
+    std.debug.print("{any}\n", .{maybe_parse_invert.chain("0")});
+    std.debug.print("{any}\n", .{maybe_parse_invert.chain("x")});
+
+    std.debug.print("{any}\n", .{either_parse_invert.chain("4")});
+    std.debug.print("{any}\n", .{either_parse_invert.chain("0")});
+    std.debug.print("{any}\n", .{either_parse_invert.chain("x")});
+}
+```
+
+Which (surprise) it does.
 
 ```
+.{ .just = 0.25 }
+.{ .nothing = void }
+.{ .nothing = void }
+
+.{ .right = 0.25 }
+.{ .left = error.divide_by_zero }
+.{ .left = error.InvalidCharacter }
+```
+
+Just like that, we have monads in Zig.
+
+# Conclusions and Remarks
+
+I want to be very clear: I am **not** telling you to put functors and monads
+into your zig code.  I'm not sure that higher-kinded functional programming is
+a good fit for this language.  Instead, I hope I have impressed on you as a
+reader how *powerful* the trait design pattern is.  I have found it to be a
+both useful and pleasant way to organize my code.
+
+At a deeper level, even if you decide traits aren't for you, I hope this
+convinces you to find more ways **decouple your data and types from your
+functions**.  I think Zig is really at its best when we put down our OOP
+tendencies, and think of our code just in terms of the data layouts we want and
+the functions that need to transform them.  Traits show that we can have our
+data oriented design and our type systems too.  We just need to break free from
+our tendency to think in terms of methods that are tightly bound to a type and
+data layout.
 

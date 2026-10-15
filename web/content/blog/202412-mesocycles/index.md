@@ -23,7 +23,7 @@ I progressed throughout the year, I drew more from this paradigm, and I think I
 have arrived at a parallel approach to my creative work that I’m truly excited
 to share.
 
-# A Foundation of Daily Habit and Enjoyment
+## A Foundation of Daily Habit and Enjoyment
 
 This 1-month regimen worked out more splendidly than I could have hoped. It
 forced me into a dialogue with myself about what would be _fun_ to work on for a
@@ -50,7 +50,7 @@ allow me to reconnect with that enjoyment I feel when I make something. If you
 are interested in adopting this methodology, I would urge you to stay in close
 touch with your own enjoyment and sense of play.
 
-# Sports Periodization
+## Sports Periodization
 
 When accomplished athletes complete, they often plan in terms of yearly training
 cycles leading up to the major yearly competition. This yearly cycle is broken
@@ -80,7 +80,7 @@ The process boils down to:
 4. Use that time in your weekly routine wisely though: you only have about a
    month to make the progress you need.
 
-# Creative Periodization
+## Creative Periodization
 
 When I committed to only doing 1-month creative projects this year, it was in
 some ways a declaration of bankruptcy. The truth is that I commit to projects at
@@ -104,7 +104,7 @@ something else. I would try to choose things that I thought I could get done in
 a month, but if I lost interest or the project petered out, no problem. Just
 take it as a data point, pull the plug and move on.
 
-# Mesocycles are a Sweet Spot
+## Mesocycles are a Sweet Spot
 
 Sports and creative arts are both endeavors where motivated people invest a lot
 of hard work to develop their capacities, but ultimately the only thing that
@@ -182,7 +182,7 @@ projects and maybe write some blog posts about them. It will be an evolving
 process, but I look forward to documenting it and sharing my findings with all
 of you.
 
-# Future Work
+## Future Work
 
 I think that in 2025 I want to work on a bigger game project. My brain is in a
 much healthier place, and it's feeling like I can finally tackle something like

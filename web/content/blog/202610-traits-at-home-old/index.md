@@ -1,5 +1,5 @@
 +++
-title = "We Have Traits at Home"
+title = "We Have Traits at Home (Draft)"
 date = 2026-10-03
 authors = ["Axel Magnuson"]
 
@@ -117,7 +117,7 @@ Tears](https://fsharpforfunandprofit.com/posts/monoids-without-tears/) by Scott
 Wlaschin
 
 
-# Decoupling Data From Functions
+## Decoupling Data From Functions
 
 One of the more pernicious harms of OOP is how it has rewired everyone's brains
 to zealously couple methods to data.  Even in languages such as Zig, which
@@ -142,7 +142,7 @@ implementation is a value of this type.  Both the trait/signature and the
 implementation are available at comptime.  Thankfully, Zig already has
 facilities for all of this.
 
-## Interfaces
+### Interfaces
 
 Let's take a closer look at a typical interface.  Suppose that we are writing a
 simple 2D geometry library.  We don't know how it's going to be used yet, but
@@ -228,7 +228,7 @@ opaque pointer like that, it doesn't make much sense to ever decouple them.
 Those functions are not much use if you don't keep *very good track* of the
 pointer they are coupled to.
 
-## Duck Typing
+### Duck Typing
 
 Consider instead the duck-typing alternative.  How would we define this if we
 wanted static polymorphism?  The way I see used most commonly is to rely on
@@ -275,7 +275,7 @@ type itself.  It pushes us to write in a style that declares methods within our
 structs, rather than functions that operate on data.
 
 
-## Traits
+### Traits
 
 There is, however, a secret third way, which can be used to express type
 contracts at compile-time without paying the cost of dynamic dispatch.  It is
@@ -357,7 +357,7 @@ functional programming, you may also be starting to realize that this unlocks a
 world of possibilities.
 
 
-# Glorious Trait Functors
+## Glorious Trait Functors
 
 Traits as I have described above are directly inspired by modules in Ocaml.  To
 extend the power of traits, we can first study the parallels in OCaml.
@@ -549,7 +549,7 @@ fn run() i32 {
 This is a toy example for the sake of brevity, but hopefully it shows how
 powerful this pattern can be.
 
-## Observations
+### Observations
 
 Interfaces are often discussed in terms of "is-a" relationships.  By
 implementing an Allocator interface for a new type, we say that the type "is an
@@ -569,7 +569,7 @@ haven't had to write it yet because when I use traits, I end up writing
 relatively few runtime interfaces.
 
 
-# Example: Streaming
+## Example: Streaming
 
 To make these concepts more concrete, let's tackle a common abstraction task in
 other languages: streaming.  You have some type, and one way or another it can
@@ -657,7 +657,7 @@ This prints about what we'd expect.[^streams2.zig]
 14
 ```
 
-## Adding Streaming Methods
+### Adding Streaming Methods
 
 Streaming libraries aren't much good without functions that operate on streams,
 so let's build a few of those first.  We'll start with `filter`.
@@ -783,7 +783,7 @@ We could of course extend the streaming API much further with these tools, but
 I will leave off here for now.  Hopefully this gives a good idea of what it is
 like to use this style of programming in practice.
 
-# Higher Kinded Types
+## Higher Kinded Types
 
 What we have discussed so far is probably all you need to work effectively with
 traits in Zig.  At the very least, I have found it to be a very *enjoyable*
@@ -879,7 +879,7 @@ at comptime ends up being all you need for this to fall out naturally.  This
 toy example isn't very useful yet, but let's see what we can do by applying
 some classic higher kinded types from other languages to Zig..
 
-# The Other Kind of Functor
+## The Other Kind of Functor
 
 Haskell[^haskell-functor] and Scala[^scala-functor] make heavy use of the
 `Functor` design pattern, which is basically a generalized way of declaring
@@ -1109,7 +1109,7 @@ Running this confirms that our `withResult` function generalizes to `Buf4`.
 .{ .buf = { .{ 1, 3.5 }, .{ 2, 4.5 }, .{ 3, 5.5 }, .{ 4, 6.5 } } }
 ```
 
-#  Inglorious Monads
+## Inglorious Monads
 
 We've made it this far, so I couldn't help but go for the big one: Monads.  For
 the uninitiated, they have attained a sort of cult status within functional
@@ -1418,7 +1418,7 @@ Which (surprise) it does.
 
 Just like that, we have monads in Zig.
 
-# Conclusions and Remarks
+## Conclusions and Remarks
 
 I want to be very clear: I am **not** telling you to put functors and monads
 into your Zig code.  I'm not sure that higher-kinded functional programming is

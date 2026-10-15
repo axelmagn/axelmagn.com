@@ -1,0 +1,61 @@
+// Sidenotes, driven by ordinary Markdown footnotes (needs bottom_footnotes = true).
+// Linked from templates/post.html, whose script pairs each note with its reference.
+
+// Default (phones, older browsers): a footnote list after the post
+.footnotes {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--muted);
+
+  li {
+    margin-bottom: 0.5em;
+  }
+  li::marker {
+    color: var(--accent);
+  }
+  p {
+    margin: 0 0 0.5em;
+  }
+  p:last-of-type {
+    display: inline;
+  }
+  img {
+    max-width: 100%;
+  }
+}
+
+// Wide screens with anchor positioning: move each note beside its reference.
+// 84rem leaves room for a 14rem note beyond the 860px content column.
+@supports (anchor-name: --a) {
+  @media (min-width: 84rem) {
+    .post-body.sidenotes {
+      position: relative;
+
+      .footnotes {
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+      .footnotes-list {
+        margin: 0;
+        padding: 0;
+      }
+      .footnotes-list > li {
+        margin: 0;
+        position: absolute; // position-anchor is set inline by the script
+        anchor-name: --sidenote;
+        left: calc(100% + 2rem);
+        width: 14rem;
+        list-style-position: inside;
+        // level with its reference, or just below the previous note if that's lower
+        top: max(anchor(top), anchor(--sidenote bottom, 0px) + 0.75rem);
+      }
+      .footnotes-list a[href*="#fr-"] {
+        display: none;
+      }
+    }
+  }
+}

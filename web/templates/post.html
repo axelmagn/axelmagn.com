@@ -1,0 +1,20 @@
+{% extends "colorized/templates/post.html" %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ get_url(path='sidenotes.css', cachebust=true) }}">
+<link rel="stylesheet" href="{{ get_url(path='sticky-toc.css', cachebust=true) }}">
+{% endblock %}
+
+{% block body_scripts %}
+{{ super() }}
+<script>
+// Pair each footnote with its reference so CSS can place it alongside (see sass/sidenotes.scss).
+document.querySelectorAll('.footnotes-list > li[id^="fn-"]').forEach(function (li, i) {
+  var ref = document.getElementById('fr-' + li.id.slice(3) + '-1');
+  if (!ref) return;
+  ref.style.anchorName = li.style.positionAnchor = '--sn' + i;
+  li.closest('.post-body').classList.add('sidenotes');
+});
+</script>
+{% endblock %}

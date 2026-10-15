@@ -1,0 +1,29 @@
+// Sticky table of contents in the left margin, when there's room for it.
+// Linked from templates/post.html. Same breakpoint as sidenotes.scss.
+
+@media (min-width: 84rem) {
+  // Add a 14rem column to the left of the post, pulled out into the margin so
+  // the text column keeps its usual width and position.
+  article:has(> .toc) {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    column-gap: 2rem;
+    margin-left: -16rem;
+
+    > * {
+      grid-column: 2;
+    }
+
+    // Spans the header rows and the post body, so it can stick for the whole post.
+    > .toc {
+      grid-column: 1;
+      grid-row: 1 / span 4;
+      align-self: start;
+      position: sticky;
+      top: 2rem;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      margin-bottom: 0;
+    }
+  }
+}

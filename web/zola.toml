@@ -1,0 +1,29 @@
+# The URL the site will be built for
+base_url = "https://axelmagn.com"
+
+title = "Mesoloop"
+# copyright_holder = "Axel Magnuson"
+theme = "colorized"
+taxonomies = [{name = "tags"}]
+
+# Whether to automatically compile all Sass files in the sass directory
+compile_sass = true
+
+# Whether to build a search index to be used later on by a JavaScript library
+build_search_index = true
+
+[markdown]
+bottom_footnotes = true
+
+[markdown.highlighting]
+theme = "catppuccin-mocha"
+
+[extra]
+# Put all your custom variables here
+site_title = "Mesoloop"
+landing_subtitle = "Axel Magnuson's blog"
+copyright_holder = "Axel Magnuson"
+nav_links = [
+    { name = "tags", path = "/tags" },
+]
+footer_links = []

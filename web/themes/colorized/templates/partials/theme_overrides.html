@@ -1,0 +1,17 @@
+{% if config.extra.colors is defined %}
+<style>
+:root {
+  {% if config.extra.colors.bg is defined %}--bg: {{ config.extra.colors.bg }};{% endif %}
+  {% if config.extra.colors.codebg is defined %}--codebg: {{ config.extra.colors.codebg }};{% endif %}
+  {% if config.extra.colors.text is defined %}--text: {{ config.extra.colors.text }};{% endif %}
+  {% if config.extra.colors.muted is defined %}--muted: {{ config.extra.colors.muted }};{% endif %}
+  {% if config.extra.colors.accent is defined %}--accent: {{ config.extra.colors.accent }};{% endif %}
+  {% if config.extra.colors.pink is defined %}--pink: {{ config.extra.colors.pink }};{% endif %}
+  {% if config.extra.colors.green is defined %}--green: {{ config.extra.colors.green }};{% endif %}
+  {% if config.extra.colors.amber is defined %}--amber: {{ config.extra.colors.amber }};{% endif %}
+  {% if config.extra.colors.blue is defined %}--blue: {{ config.extra.colors.blue }};{% endif %}
+  {% if config.extra.colors.red is defined %}--red: {{ config.extra.colors.red }};{% endif %}
+  {% if config.extra.colors.surface is defined %}--surface: {{ config.extra.colors.surface }};{% endif %}
+}
+</style>
+{% endif %}

@@ -1,0 +1,44 @@
+// Shimmer — inline text color-cycling wave via animated gradient
+// Consumer: shimmer shortcode (any page)
+
+@keyframes shimmer-wave {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    var(--pink),
+    var(--green),
+    var(--amber),
+    var(--blue),
+    var(--red),
+    var(--accent)
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-wave 8s ease-in-out infinite alternate;
+}
+
+// Reduce-motion: fall back to static accent color
+html.reduce-motion .shimmer {
+  animation: none;
+  background: none;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background: none;
+    color: var(--accent);
+  }
+}

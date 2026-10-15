@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}
+{% if page is defined %}{{ page.title }}{% else %}{{ section.title }}{% endif %} | {{ config.title }}
+{% endblock %}
+{% block content %}
+{% if page is defined %}
+  {% set_global about_title = page.title %}
+  {% set_global about_content = page.content %}
+  {% set_global about_extra = page.extra %}
+{% else %}
+  {% set_global about_title = section.title %}
+  {% set_global about_content = section.content %}
+  {% set_global about_extra = section.extra %}
+{% endif %}
+<div class="about-hero">
+  <h1>{{ about_title }}</h1>
+  {% if about_extra.subtitle is defined %}
+  <p class="about-subtitle">{{ about_extra.subtitle }}</p>
+  {% endif %}
+</div>
+<hr class="about-divider">
+<div class="about-body">
+  {{ about_content | safe }}
+</div>
+{% endblock %}

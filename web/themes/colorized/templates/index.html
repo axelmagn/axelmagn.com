@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color:{% if config.extra.colors is defined and config.extra.colors.bg is defined %}{{ config.extra.colors.bg }}{% else %}#1a1a2e{% endif %}">
+<head>
+  {% include "partials/head_common.html" %}
+  <title>{{ config.extra.site_title | default(value=config.title) }}</title>
+</head>
+<body>
+  <div class="landing">
+    <div class="landing-content">
+      <h1 class="landing-title{% if config.extra.landing_center is defined %} landing-centered{% endif %}">
+        {%- if config.extra.landing_chars is defined -%}
+          {%- if config.extra.landing_center is defined -%}
+            {%- set center = config.extra.landing_center -%}
+            <span class="landing-left">{%- for item in config.extra.landing_chars -%}{%- if loop.index0 < center -%}<span class="{{ item.class }}">{{ item.char }}</span>{%- endif -%}{%- endfor -%}</span>
+            {%- for item in config.extra.landing_chars -%}{%- if loop.index0 == center -%}<span class="{{ item.class }}">{{ item.char }}</span>{%- endif -%}{%- endfor -%}
+            <span class="landing-right">{%- for item in config.extra.landing_chars -%}{%- if loop.index0 > center -%}<span class="{{ item.class }}">{{ item.char }}</span>{%- endif -%}{%- endfor -%}</span>
+          {%- else -%}
+            {%- for item in config.extra.landing_chars -%}
+              <span class="{{ item.class }}">{{ item.char }}</span>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- else -%}
+          <span class="landing-title-text">{{ config.extra.site_title | default(value=config.title) }}</span>
+        {%- endif -%}
+      </h1>
+      <p class="landing-subtitle">{{ config.extra.landing_subtitle | default(value="") }}</p>
+      <nav class="landing-nav">
+        {% if config.extra.nav_links is defined %}
+        {% for link in config.extra.nav_links %}
+        <a href="{{ link.path }}">{{ link.name }}</a>
+        {% endfor %}
+        {% endif %}
+      </nav>
+      {% include "partials/reduce_motion.html" %}
+      <footer>{% include "partials/copyright.html" %}</footer>
+    </div>
+  </div>
+</body>
+</html>

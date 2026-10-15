@@ -1,0 +1,4 @@
+{# Preserve the old inline trailing space without breaking Markdown emphasis. #}
+{% component shimmer(text="") -%}
+<span class="shimmer">{{ text | escape_html }}</span>&#32;
+{%- endcomponent %}

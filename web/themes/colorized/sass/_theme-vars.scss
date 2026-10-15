@@ -1,0 +1,16 @@
+// Theme CSS custom properties — bridge from Sass defaults to runtime-overridable vars
+// Consumers: all partials (via var(--name) references)
+
+:root {
+  --bg: #{$bg};
+  --codebg: #{$codebg};
+  --text: #{$text};
+  --muted: #{$muted};
+  --accent: #{$accent};
+  --pink: #{$pink};
+  --green: #{$green};
+  --amber: #{$amber};
+  --blue: #{$blue};
+  --red: #{$red};
+  --surface: #{$surface};
+}

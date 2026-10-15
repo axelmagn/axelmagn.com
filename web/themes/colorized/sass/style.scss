@@ -1,0 +1,40 @@
+// colorized.life styles
+//
+// Organization:
+//   - by function: styles shared across multiple pages (base, typography, code, chrome, alerts, post-list)
+//   - by page: styles scoped to a single page template (landing, post)
+//
+// When adding styles, put them in the file matching their scope.
+// If a style is used by only one template, it belongs in that page's file.
+// If it's shared, it belongs in the appropriate functional file.
+
+// Design tokens & assets
+@import "fonts/space-grotesk";
+@import "fonts/martian-mono";
+@import "fonts/jetbrains-mono";
+@import "variables";
+@import "theme-vars";
+@import "icons";
+
+// Shared foundations
+@import "base";
+@import "typography";
+@import "code";
+@import "table";
+@import "scrollbar";
+@import "chrome";
+
+// Shared components
+@import "alerts";
+@import "toc";
+@import "post-list";
+@import "shimmer";
+@import "images";
+@import "pagination";
+
+// Page-specific
+@import "links";
+@import "landing";
+@import "about";
+@import "palette";
+@import "post";

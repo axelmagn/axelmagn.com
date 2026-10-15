@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
+
+{% block head %}
+{% set parent_section = get_section(path=page.ancestors | last) %}
+<link rel="alternate" type="application/atom+xml" title="{{ config.title }} feed" href="{{ parent_section.permalink | safe }}atom.xml">
+{% endblock %}
+
+{% block nav_extra %}
+{% set parent_section = get_section(path=page.ancestors | last) %}
+{% set feed_url = parent_section.permalink ~ "atom.xml" %}
+{% include "partials/nav_feed.html" %}
+{% endblock %}
+
+{% block content %}
+<article>
+  <h1>{{ page.title }}</h1>
+  <div class="post-meta">
+    <time datetime="{{ page.date }}">{{ page.date | date(format="%Y-%m-%d") }}</time>
+    {%- if page.taxonomies.tags %}
+    &middot;
+    {%- for tag in page.taxonomies.tags %}
+    <a href="{{ get_taxonomy_url(kind="tags", name=tag) }}">{{ tag }}</a>
+    {%- if not loop.last %}, {% endif %}
+    {%- endfor %}
+    {%- endif %}
+  </div>
+  <div class="dashed-accent"></div>
+  {% if page.toc %}
+  <nav class="toc">
+    <span class="toc-title">Contents</span>
+    <ul>
+    {% for h in page.toc %}
+      <li>
+        <a href="{{ h.permalink | safe }}">{{ h.title }}</a>
+        {% if h.children %}
+        <ul>
+          {% for child in h.children %}
+          <li><a href="{{ child.permalink | safe }}">{{ child.title }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+  <div class="post-body">
+    {{ page.content | safe }}
+  </div>
+</article>
+<script>
+document.querySelectorAll('.post-body table').forEach(function(table) {
+  var cols = table.querySelector('tr').children.length;
+  if (cols <= 2) table.style.minWidth = '400px';
+  else if (cols === 3) table.style.minWidth = '600px';
+  else table.style.minWidth = (cols * 200) + 'px';
+  var wrapper = document.createElement('div');
+  wrapper.className = 'table-scroll';
+  table.parentNode.insertBefore(wrapper, table);
+  wrapper.appendChild(table);
+});
+</script>
+{% if page.lower or page.higher %}
+<nav class="pagination">
+  {% if page.higher %}<a href="{{ page.higher.permalink }}">← prev</a>{% endif %}
+  {% if page.lower %}<a href="{{ page.lower.permalink }}">next →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

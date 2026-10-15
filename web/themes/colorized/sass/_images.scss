@@ -1,0 +1,55 @@
+// Images — figure/image positioning styles for the image shortcode
+// Consumer: shortcodes/image.html
+
+.img-figure {
+  margin: 1.5rem 0;
+
+  img {
+    display: block;
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  figcaption {
+    font-family: $font-mono;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+}
+
+.img-full img {
+  width: 100%;
+}
+
+.img-center {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+
+  img {
+    width: 100%;
+  }
+}
+
+.img-left {
+  float: left;
+  width: 40%;
+  margin: 0 1.5rem 1rem 0;
+}
+
+.img-right {
+  float: right;
+  width: 40%;
+  margin: 0 0 1rem 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .img-left,
+  .img-right,
+  .img-center {
+    float: none;
+    width: 100%;
+    margin: 1.5rem 0;
+  }
+}

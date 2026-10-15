@@ -1,0 +1,27 @@
+// Links — stacked link enumeration
+// Consumer: links.html
+
+.links-list {
+  list-style: none;
+  padding: 1rem 0; // knob: links list vertical padding
+
+  li {
+    margin-bottom: 1rem; // knob: space between link entries
+  }
+
+  a {
+    font-size: 1.1rem; // knob: link font size
+    color: var(--text);
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+
+  .links-description {
+    display: block;
+    font-family: $font-body;
+    font-size: 0.9rem; // knob: description font size
+    color: var(--muted);
+  }
+}

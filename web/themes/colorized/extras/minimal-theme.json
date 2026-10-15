@@ -1,0 +1,86 @@
+{
+  "$schema": "vscode://schemas/color-theme",
+  "name": "minimal-smoke",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#11111E",
+    "editor.foreground": "#F5F5F5",
+    "editorCursor.foreground": "#F5F5F5",
+
+    "editor.selectionBackground": "#2A2A3D",
+    "editor.inactiveSelectionBackground": "#1F1F30",
+
+    "editor.lineHighlightBackground": "#191928",
+
+    "editorLineNumber.foreground": "#3D3D52",
+    "editorLineNumber.activeForeground": "#6A6A80",
+
+    "editor.findMatchBackground": "#3A3A50",
+    "editor.findMatchHighlightBackground": "#252538",
+
+    "editorIndentGuide.background": "#1F1F30",
+    "editorIndentGuide.activeBackground": "#3D3D52",
+
+    "editorBracketMatch.background": "#2A2A3D",
+    "editorBracketMatch.border": "#3D3D52",
+
+    "editor.wordHighlightBackground": "#252538"
+  },
+  "tokenColors": [
+    {
+      "name": "Comments",
+      "scope": ["comment", "punctuation.definition.comment"],
+      "settings": {
+        "foreground": "#888888",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Keywords and primitive/built-in types",
+      "scope": [
+        "keyword",
+        "storage.type",
+        "storage.modifier",
+        "entity.name.type",
+        "entity.name.class",
+        "entity.other.inherited-class",
+        "support.type",
+        "support.class",
+        "variable.language"
+      ],
+      "settings": {
+        "foreground": "#7EC8A0"
+      }
+    },
+    {
+      "name": "Functions",
+      "scope": [
+        "entity.name.function",
+        "support.function",
+        "meta.function-call"
+      ],
+      "settings": {
+        "foreground": "#A78BFA"
+      }
+    },
+    {
+      "name": "Strings",
+      "scope": ["string", "punctuation.definition.string"],
+      "settings": {
+        "foreground": "#E8A0B4"
+      }
+    },
+    {
+      "name": "Numbers and constants",
+      "scope": [
+        "constant.numeric",
+        "constant.language",
+        "constant.character",
+        "support.constant"
+      ],
+      "settings": {
+        "foreground": "#D4A76A"
+      }
+    }
+  ]
+}

@@ -26,18 +26,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Zola
+        uses: taiki-e/install-action@v2
         with:
-          fetch-depth: 0 # Zine uses git history for page metadata and timestamps
+          tool: zola
 
-      - name: Symlink zine config for setup action
-        run: ln -sf web/zine.ziggy zine.ziggy
-
-      - name: Setup Zine
-        uses: kristoff-it/setup-zine@v2
-
-      - name: Build site with Zine
+      - name: Build site with Zola
         working-directory: web
-        run: zine release
+        run: zola build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

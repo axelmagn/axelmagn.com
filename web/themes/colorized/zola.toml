@@ -1,0 +1,44 @@
+title = "demo.colorized.life"
+
+base_url = "https://demo.colorized.life"
+
+compile_sass = true
+build_search_index = false
+
+generate_feeds = true
+feed_filenames = ["atom.xml"]
+
+taxonomies = [{ name = "tags" }]
+
+[markdown]
+github_alerts = true
+
+[markdown.highlighting]
+theme = "minimal-smoke"
+extra_themes = ["extras/minimal-theme.json"]
+
+[extra]
+site_title = "demo.colorized.life"
+landing_subtitle = "Better than slideware"
+copyright_holder = "colorized.life"
+copyright_url = "https://colorized.life"
+
+nav_links = [
+  { name = "about", path = "/about" },
+  { name = "blog", path = "/blog" },
+  { name = "source", path = "https://git.colorized.life/demo.colorized.life/about/" },
+  { name = "tags", path = "/tags" },
+]
+
+footer_links = [
+  { name = "palette", path = "/palette" },
+  { name = "acknowledgements", path = "/acknowledgements" },
+  { name = "sites", path = "/sites" },
+]
+
+landing_center = 1
+landing_chars = [
+  { char = "demo.", class = "c-muted" },
+  { char = "colorized", class = "shimmer" },
+  { char = ".life", class = "c-muted" },
+]

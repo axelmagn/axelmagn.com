@@ -1,0 +1,10 @@
+<script>
+  var _cd='{% if config.extra.cookie_domain is defined %}{{ config.extra.cookie_domain }}{% endif %}';
+  if (document.cookie.split('; ').some(function(c){return c==='reduce-motion=on'})) {
+    document.documentElement.classList.add('reduce-motion');
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.querySelector('.reduce-motion-toggle');
+      if (btn) btn.setAttribute('aria-pressed', 'true');
+    });
+  }
+</script>

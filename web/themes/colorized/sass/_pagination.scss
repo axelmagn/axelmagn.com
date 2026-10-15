@@ -1,0 +1,21 @@
+// Pagination — shared prev/next and page navigation
+// Consumers: templates/blog.html, templates/post.html
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  font-size: 0.95rem;
+
+  a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: $font-body;
+    margin-right: 0;
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+}

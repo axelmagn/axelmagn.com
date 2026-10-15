@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" {% block html_attrs %}style="background-color:{% if config.extra.colors is defined and config.extra.colors.bg is defined %}{{ config.extra.colors.bg }}{% else %}#1a1a2e{% endif %}"{% endblock %}>
+<head>
+  {% block head_meta %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="{% if config.extra.colors is defined and config.extra.colors.bg is defined %}{{ config.extra.colors.bg }}{% else %}#1a1a2e{% endif %}">
+  {% include "partials/favicons.html" %}
+  {% endblock %}
+  <title>{% block title %}{{ config.title }}{% endblock %}</title>
+  {% block head_styles %}
+  <link rel="stylesheet" href="{{ get_url(path='style.css', cachebust=true) }}">
+  {% include "partials/theme_overrides.html" %}
+  {% endblock %}
+  {% block head_scripts %}
+  {% include "partials/reduce_motion_init.html" %}
+  {% endblock %}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="container">
+    {% block nav %}
+    <nav>
+      {% block nav_left %}
+      <span class="nav-group nav-left"><a href="{% if config.extra.home_url is defined and config.extra.home_url %}{{ config.extra.home_url | escape_html | safe }}{% else %}{{ get_url(path='/') }}{% endif %}">home</a></span>
+      {% endblock %}
+      <span class="nav-separator"></span>
+      {% block nav_middle %}
+      <span class="nav-group nav-middle">
+        {% if config.extra.nav_links is defined %}
+        {% for link in config.extra.nav_links %}
+        <a href="{{ link.path }}">{{ link.name }}</a>
+        {% endfor %}
+        {% endif %}
+      </span>
+      {% endblock %}
+      {% block nav_extra %}{% endblock %}
+    </nav>
+    {% endblock %}
+    {% block content %}{% endblock %}
+    {% block footer %}
+    <footer>
+      {% block footer_content %}
+      {% include "partials/copyright.html" %}
+
+      {% endblock %}
+      {% block footer_toggle %}
+      {% include "partials/reduce_motion.html" %}
+      {% endblock %}
+    </footer>
+    {% endblock %}
+  </div>
+  {% block body_scripts %}
+  <script src="{{ get_url(path='js/code-blocks.js', cachebust=true) }}"></script>
+  {% endblock %}
+</body>
+</html>

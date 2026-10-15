@@ -1,0 +1,14 @@
+<button
+  class="reduce-motion-toggle"
+  aria-pressed="false"
+  aria-label="Reduce motion"
+  onclick="
+    var on = document.documentElement.classList.toggle('reduce-motion');
+    document.cookie = 'reduce-motion=' + (on ? 'on' : '') + '; path=/; SameSite=Lax; max-age=' + (on ? 31536000 : 0) + (_cd ? '; domain=' + _cd : '');
+    this.setAttribute('aria-pressed', on);
+  "
+>
+  <span class="reduce-motion-icon"></span>
+  Reduce Motion
+  <span class="toggle-switch"><span class="toggle-knob"></span></span>
+</button>

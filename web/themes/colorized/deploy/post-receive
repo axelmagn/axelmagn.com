@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Configuration -----------------------------------------------------------
+
+DEPLOY_ROOT="/srv/www"
+RELEASES_DIR="${DEPLOY_ROOT}/releases/demo.colorized.life"
+SYMLINK_PATH="${DEPLOY_ROOT}/demo.colorized.life"
+KEEP_RELEASES=3
+
+# --- Determine which ref was pushed -----------------------------------------
+
+deploy_sha=""
+while read -r _old_sha new_sha ref; do
+  if [[ "${ref}" == "refs/heads/main" ]]; then
+    deploy_sha="${new_sha}"
+  fi
+done
+
+if [[ -z "${deploy_sha}" ]]; then
+  echo "post-receive: refs/heads/main not in push, skipping deploy."
+  exit 0
+fi
+
+short_sha="${deploy_sha:0:7}"
+echo "==> Deploying demo.colorized.life @ ${short_sha}"
+
+# --- Set up temp workspace and cleanup trap ----------------------------------
+
+work_dir="$(mktemp -d)"
+trap 'rm -rf "${work_dir}"' EXIT
+
+# --- Clone site source with submodules --------------------------------------
+# We're running inside a bare repo, so GIT_DIR is set. Capture the bare repo
+# path before unsetting, then clone from it. A local-path clone hardlinks
+# objects — fast, no extra disk, no network.
+
+bare_repo="$(cd "${GIT_DIR}" && pwd -P)"
+unset GIT_DIR GIT_WORK_TREE
+
+git clone --recurse-submodules "${bare_repo}" "${work_dir}"
+
+echo "==> Source cloned to temp dir"
+
+# --- Build with zola ---------------------------------------------------------
+
+(cd "${work_dir}" && zola build)
+
+if [[ ! -f "${work_dir}/public/index.html" ]]; then
+  echo "ERROR: build output missing index.html, aborting deploy"
+  exit 1
+fi
+
+echo "==> Build succeeded"
+
+# --- Deploy to a new release directory ---------------------------------------
+
+release_id="$(date -u +%Y%m%d-%H%M%S)-${short_sha}"
+release_dir="${RELEASES_DIR}/${release_id}"
+
+mkdir -p "${release_dir}"
+cp -a "${work_dir}/public/." "${release_dir}/"
+
+echo "==> Release created: ${release_id}"
+
+# --- Atomic symlink swap -----------------------------------------------------
+
+tmp_link="${SYMLINK_PATH}.tmp.$$"
+ln -s "${release_dir}" "${tmp_link}"
+mv -Tf "${tmp_link}" "${SYMLINK_PATH}"
+
+echo "==> Symlink updated: ${SYMLINK_PATH} -> ${release_dir}"
+
+# --- Reload nginx (non-fatal) ------------------------------------------------
+
+if sudo systemctl reload nginx; then
+  echo "==> nginx reloaded"
+else
+  echo "WARNING: nginx reload failed (exit $?), site may serve stale config"
+fi
+
+# --- Prune old releases ------------------------------------------------------
+
+live_target="$(readlink -f "${SYMLINK_PATH}")"
+
+mapfile -t all_releases < <(
+  ls -1d "${RELEASES_DIR}"/*/ 2>/dev/null | sort -r
+)
+
+if ((${#all_releases[@]} > KEEP_RELEASES)); then
+  for dir in "${all_releases[@]:${KEEP_RELEASES}}"; do
+    real_dir="$(readlink -f "${dir}")"
+    if [[ "${real_dir}" == "${live_target}" ]]; then
+      echo "WARNING: skipping removal of live release ${dir}"
+      continue
+    fi
+    rm -rf "${dir}"
+    echo "==> Pruned old release: $(basename "${dir}")"
+  done
+fi
+
+echo "==> Deploy complete (${release_id})"

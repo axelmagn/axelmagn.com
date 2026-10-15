@@ -1,0 +1,64 @@
+name = "colorized"
+description = "An opinionated dark-pastel theme"
+tags = ["dark", "pastel", "blog", "developer"]
+license = "MIT"
+homepage = "https://git.colorized.life/demo.colorized.life/about/"
+min_version = "0.23.4"
+demo = "https://demo.colorized.life"
+
+[author]
+name = "Lany Atwood"
+homepage = "https://colorized.life"
+
+[extra]
+site_title = "My Site"
+landing_subtitle = "A site built with the colorized theme"
+copyright_holder = "Your Name"
+# Optional copyright_url falls back to config.base_url.
+# Optional home_url controls the home navigation destination. Missing/empty uses
+# the site root; root-relative paths and absolute URLs are rendered unchanged.
+# home_url = "/home/"
+nav_links = [{ name = "blog", path = "/blog" }, { name = "tags", path = "/tags" }]
+footer_links = [{ name = "acknowledgements", path = "/acknowledgements" }]
+
+# Nav and footer links use a simple schema: { name, path, sitemap? }
+#   name    — display text
+#   path    — local path (e.g. "/about") or absolute URL (e.g. "https://example.com")
+#   sitemap — optional bool; append local paths to the theme's automatic sitemap
+# Absolute URLs work directly without a deployment redirect; sitemap skips them.
+
+# Share the reduce-motion preference across subdomains.
+# When omitted, the preference is scoped to the current hostname only.
+# cookie_domain = ".example.com"
+
+# ─── Sitemap ───
+# The theme automatically appends nav/footer links marked `sitemap = true`.
+# No consumer template is needed. Explicit trailing slashes are preserved;
+# duplicate resolved URLs and external/protocol-relative URLs are skipped.
+# Link settings are loaded from the site's zola.toml; URLs use the runtime base.
+
+# ─── Color Overrides ───
+# Override any color without touching Sass. Only specified keys change.
+# [extra.colors]
+# bg = "#1a1a2e"
+# codebg = "#11111e"
+# text = "#f5f5f5"
+# muted = "#888888"
+# accent = "#a78bfa"
+# pink = "#e8a0b4"
+# green = "#7ec8a0"
+# amber = "#d4a76a"
+# blue = "#7ec8e8"
+# red = "#e87e7e"
+# surface = "#2a2a40"
+
+# Center a specific landing_chars span on the page centerline (0-based index).
+# Spans before it hang left, spans after hang right. Omit for default centering.
+# landing_center = 1
+
+# Optional: explicit landing title spans (Tier 2)
+# If omitted, site_title displays with slow color cycling (Tier 1)
+# Any CSS class works: c-accent, c-pink, c-green, c-amber, c-blue, c-red, c-muted, shimmer
+# landing_chars = [
+#     { char = "My Site", class = "shimmer" },
+# ]

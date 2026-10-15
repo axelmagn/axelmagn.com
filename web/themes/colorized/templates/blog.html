@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} | {{ config.title }}{% endblock %}
+
+{% block head %}
+<link rel="alternate" type="application/atom+xml" title="{{ config.title }} feed" href="{{ section.permalink | safe }}atom.xml">
+{% endblock %}
+
+{% block nav_extra %}
+{% set feed_url = section.permalink ~ "atom.xml" %}
+{% include "partials/nav_feed.html" %}
+{% endblock %}
+
+{% block content %}
+<ul class="post-list">
+  {% for page in paginator.pages %}
+  <li>
+    <div class="post-header">
+      <a href="{{ page.permalink }}">{{ page.title }}</a>
+      <time>{{ page.date | date(format="%Y-%m-%d") }}</time>
+    </div>
+    <span class="post-summary">{{ page.description }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% if paginator.previous or paginator.next %}
+<nav class="pagination">
+  {% if paginator.previous %}<a href="{{ paginator.previous }}">← newer</a>{% endif %}
+  {% if paginator.next %}<a href="{{ paginator.next }}">older →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,146 @@
+// Code — pre blocks, code font, inline code styling
+// Consumers: post content, any template rendering code
+
+pre {
+  background: var(--codebg);
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 8px;
+  padding: 1.4rem 1.6rem;
+  font-family: $font-code;
+  font-size: 0.88rem;
+  line-height: 1.75;
+  overflow-x: auto;
+  margin: 1.2rem 0;
+}
+
+code {
+  font-family: $font-code;
+  font-size: 0.92em;
+}
+
+:not(pre) > code {
+  color: var(--red);
+  background: var(--codebg);
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+pre.codeline {
+  white-space: pre;
+}
+
+.code-block {
+  margin: 1.2rem 0;
+
+  pre {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+  }
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  background-image: linear-gradient(
+    to right,
+    var(--surface) 50%,
+    color-mix(in srgb, var(--accent) 20%, transparent) 75%,
+    var(--surface) 100%
+  );
+  background-size: 200%;
+  color: var(--text);
+  font-family: $font-body;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 0.5rem 0.5rem 1.6rem;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  border-bottom: none;
+  text-transform: lowercase;
+}
+
+.code-header button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 4px;
+  line-height: 0;
+  color: var(--muted);
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--text);
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.code-header .icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-copy);
+  mask-image: var(--icon-copy);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.code-header.active {
+  animation: active-shimmer 0.8s ease;
+
+  button {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+
+    &:hover,
+    &:active {
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+      color: var(--accent);
+      transform: none;
+    }
+  }
+
+  .icon {
+    -webkit-mask-image: var(--icon-done);
+    mask-image: var(--icon-done);
+  }
+}
+
+@keyframes active-shimmer {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+// Suppress shimmer animation for reduced motion (icon flash still works via setTimeout)
+@media (prefers-reduced-motion) {
+  .code-header.active {
+    animation: none;
+  }
+}
+
+html.reduce-motion .code-header.active {
+  animation: none;
+}
+
+pre.ascii {
+  font-family: $font-code;
+  background: var(--codebg);
+  border: none;
+
+  code {
+    font-family: inherit;
+  }
+}

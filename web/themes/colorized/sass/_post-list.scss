@@ -1,0 +1,62 @@
+// Post List — post listing and tag listing components
+// Consumers: blog.html, taxonomy_single.html, taxonomy_list.html
+
+.post-list {
+  list-style: none;
+
+  li {
+    margin-bottom: 1.2rem;
+  }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  a {
+    white-space: nowrap;
+  }
+
+  .post-summary {
+    font-family: $font-body;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  time {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+.tag-list {
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  a {
+    white-space: nowrap;
+  }
+
+  .tag-count {
+    color: var(--muted);
+    font-family: $font-mono;
+    font-size: 0.8rem;
+  }
+}

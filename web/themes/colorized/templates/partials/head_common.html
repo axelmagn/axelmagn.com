@@ -1,0 +1,8 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="{% if config.extra.colors is defined and config.extra.colors.bg is defined %}{{ config.extra.colors.bg }}{% else %}#1a1a2e{% endif %}">
+{% include "partials/favicons.html" %}
+<link rel="stylesheet" href="{{ get_url(path='style.css', cachebust=true) }}">
+{% include "partials/theme_overrides.html" %}
+{% include "partials/reduce_motion_init.html" %}

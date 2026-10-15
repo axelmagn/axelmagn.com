@@ -1,0 +1,1 @@
+<span>&copy; {{ now() | date(format="%Y") }} <a href="{{ config.extra.copyright_url | default(value=config.base_url) }}">{{ config.extra.copyright_holder | default(value=config.title) }}</a>{% if config.extra.footer_links is defined -%}{% for link in config.extra.footer_links %} &middot; <a href="{{ link.path }}">{{ link.name }}</a>{% endfor -%}{% endif %}</span>

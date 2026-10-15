@@ -1,0 +1,95 @@
+// Base — foundational reset, layout, and color utilities
+// Consumers: all templates (via base.html, landing.html)
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition {
+  background-color: var(--bg, #1a1a2e);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s !important;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: $font-body;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: $container-max;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.container > nav {
+  padding-bottom: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+.container > footer {
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--muted) 30%, transparent);
+  margin: 2.5rem 0;
+}
+
+.c-accent {
+  color: var(--accent);
+}
+.c-pink {
+  color: var(--pink);
+}
+.c-green {
+  color: var(--green);
+}
+.c-amber {
+  color: var(--amber);
+}
+.c-blue {
+  color: var(--blue);
+}
+.c-red {
+  color: var(--red);
+}
+.c-muted {
+  color: var(--muted);
+}
+
+.status-page {
+  text-align: center;
+  padding: 4rem 0;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    max-width: none;
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+}

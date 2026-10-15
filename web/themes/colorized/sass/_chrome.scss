@@ -1,0 +1,163 @@
+// Chrome — shared page-frame elements (navigation, footer)
+// Consumers: base.html, landing.html
+
+nav {
+  font-family: $font-mono;
+  font-size: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  a {
+    font-family: $font-body;
+    margin-right: 1.5rem;
+  }
+
+  .nav-separator {
+    width: 2px;
+    height: 1.1em;
+    background: var(--muted);
+    margin-right: 1.5rem;
+  }
+
+  .nav-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .nav-left {
+    flex-shrink: 0;
+  }
+
+  .nav-middle {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .nav-right {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .feed-btn {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .feed-icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: currentColor;
+    -webkit-mask-image: var(--icon-feed);
+    mask-image: var(--icon-feed);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: $font-mono;
+  font-size: 0.72rem;
+  color: var(--muted);
+
+  a {
+    color: var(--muted);
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+}
+
+@media (max-width: 30rem) {
+  footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}
+
+// Reduce-motion toggle button
+
+footer .reduce-motion-toggle {
+  flex-direction: row-reverse;
+}
+
+.reduce-motion-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-family: $font-mono;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.reduce-motion-icon {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  background-color: currentColor;
+  -webkit-mask-image: var(--icon-lightbulb);
+  mask-image: var(--icon-lightbulb);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 2rem;
+  height: 1.125rem;
+  background: var(--muted);
+  border-radius: 0.5625rem;
+  transition: background-color 0.2s;
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  background: var(--text);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+html.reduce-motion .toggle-switch {
+  background: var(--accent);
+}
+
+html.reduce-motion .toggle-knob {
+  transform: translateX(0.875rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reduce-motion-toggle {
+    color: var(--muted);
+    cursor: default;
+  }
+
+  .toggle-switch {
+    opacity: 0.4;
+  }
+}

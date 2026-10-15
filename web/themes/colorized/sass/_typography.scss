@@ -1,0 +1,52 @@
+// Typography — headings, paragraphs, links, muted text
+// Consumers: all templates
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 1.65rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+p {
+  margin-bottom: 1rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+time {
+  font-family: $font-mono;
+  color: var(--muted);
+}
+
+blockquote:not([class]) {
+  border-left: 4px solid var(--muted);
+  padding-left: 1rem;
+  margin: 1.2rem 0;
+}

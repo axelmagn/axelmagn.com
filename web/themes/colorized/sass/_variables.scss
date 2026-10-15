@@ -1,0 +1,23 @@
+// Variables — design tokens (palette, fonts, layout)
+// Consumers: all partials
+
+// Palette
+$bg: #1a1a2e !default;
+$codebg: #11111e !default;
+$text: #f5f5f5 !default;
+$muted: #888888 !default;
+$accent: #a78bfa !default;
+$pink: #e8a0b4 !default;
+$green: #7ec8a0 !default;
+$amber: #d4a76a !default;
+$blue: #7ec8e8 !default;
+$red: #e87e7e !default;
+$surface: #2a2a40 !default;
+
+// Fonts
+$font-body: "Space Grotesk", sans-serif !default;
+$font-mono: "Martian Mono", monospace !default;
+$font-code: "JetBrains Mono", monospace !default;
+
+// Layout
+$container-max: 860px !default;

@@ -1,0 +1,25 @@
+{% component image(url, content_path="", position="", alt="", url_min="") -%}
+{%- set class = "img-figure" -%}
+{%- if position -%}
+	{%- set class = class ~ " img-" ~ position -%}
+{%- endif -%}
+{%- if not url is starting_with(pat="/") and not url is starting_with(pat="http") -%}
+	{%- set url = content_path ~ url -%}
+{%- endif -%}
+{%- if url_min and not url_min is starting_with(pat="/") and not url_min is starting_with(pat="http") -%}
+	{%- set url_min = content_path ~ url_min -%}
+{%- endif -%}
+
+<figure class="{{ class | escape_html }}">
+	{%- if url_min -%}
+		<a href="{{ url | escape_html }}">
+			<img src="{{ url_min | escape_html }}" {% if alt %}alt="{{ alt | escape_html }}" {% endif %}decoding="async" loading="lazy" />
+		</a>
+	{%- else -%}
+		<img src="{{ url | escape_html }}" {% if alt %}alt="{{ alt | escape_html }}" {% endif %}decoding="async" loading="lazy" />
+	{%- endif -%}
+	{%- if alt -%}
+		<figcaption>{{ alt | escape_html }}</figcaption>
+	{%- endif -%}
+</figure>
+{%- endcomponent %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Palette — {{ config.title }}{% endblock %}
+
+{% block content %}
+<h1>Palette</h1>
+
+<div class="palette-section">Core</div>
+<div class="palette-grid">
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--bg)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Space Indigo</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.bg is defined %}{{ config.extra.colors.bg | upper }}{% else %}#1A1A2E{% endif %}</div>
+      <div class="palette-role">Background</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--codebg)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Void</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.codebg is defined %}{{ config.extra.colors.codebg | upper }}{% else %}#11111E{% endif %}</div>
+      <div class="palette-role">Code blocks</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--surface)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Surface</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.surface is defined %}{{ config.extra.colors.surface | upper }}{% else %}#2A2A40{% endif %}</div>
+      <div class="palette-role">Panels, hover states</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--text)"></div>
+    <div class="palette-info">
+      <div class="palette-name">White Smoke</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.text is defined %}{{ config.extra.colors.text | upper }}{% else %}#F5F5F5{% endif %}</div>
+      <div class="palette-role">Primary text</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--muted)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Grey Olive</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.muted is defined %}{{ config.extra.colors.muted | upper }}{% else %}#888888{% endif %}</div>
+      <div class="palette-role">Secondary text</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--accent)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Soft Violet</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.accent is defined %}{{ config.extra.colors.accent | upper }}{% else %}#A78BFA{% endif %}</div>
+      <div class="palette-role">Accent, links, headers</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--pink)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Blush</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.pink is defined %}{{ config.extra.colors.pink | upper }}{% else %}#E8A0B4{% endif %}</div>
+      <div class="palette-role">Strings, values</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--green)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Sage</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.green is defined %}{{ config.extra.colors.green | upper }}{% else %}#7EC8A0{% endif %}</div>
+      <div class="palette-role">Keywords, types, success</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--amber)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Amber</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.amber is defined %}{{ config.extra.colors.amber | upper }}{% else %}#D4A76A{% endif %}</div>
+      <div class="palette-role">Numbers, warnings, tags</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--blue)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Sky</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.blue is defined %}{{ config.extra.colors.blue | upper }}{% else %}#7EC8E8{% endif %}</div>
+      <div class="palette-role">Info, highlights</div>
+    </div>
+  </div>
+  <div class="palette-swatch">
+    <div class="palette-color" style="background: var(--red)"></div>
+    <div class="palette-info">
+      <div class="palette-name">Coral</div>
+      <div class="palette-hex">{% if config.extra.colors is defined and config.extra.colors.red is defined %}{{ config.extra.colors.red | upper }}{% else %}#E87E7E{% endif %}</div>
+      <div class="palette-role">Errors, deletions</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

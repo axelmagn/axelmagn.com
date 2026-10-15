@@ -1,0 +1,8 @@
+{% component ascii(src="", colocated_path="") -%}
+{% if src -%}
+{% set art = load_data(path=colocated_path ~ src) -%}
+<pre class="ascii"><code>{{ art | escape_html }}</code></pre>
+{%- else -%}
+<pre class="ascii"><code>{{ body | trim | escape_html }}</code></pre>
+{%- endif %}
+{%- endcomponent %}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+{# Sitemap context contains entries, not config. Load only the site's link settings;
+   get_url uses the runtime base URL, including build/serve preview overrides. #}
+{%- set data = load_data(path="zola.toml", format="toml") -%}
+{%- set_global seen = [] -%}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {%- for entry in entries %}
+    <url>
+        <loc>{{ entry.permalink | escape_html | safe }}</loc>
+        {%- if entry.updated %}
+        <lastmod>{{ entry.updated | escape_html | safe }}</lastmod>
+        {%- endif %}
+    </url>
+    {%- set_global seen = [...seen, entry.permalink] -%}
+  {%- endfor -%}
+  {%- set_global links = [] -%}
+  {%- if data.extra is defined -%}
+    {%- if data.extra.nav_links is defined -%}
+      {%- set_global links = [...links, ...data.extra.nav_links] -%}
+    {%- endif -%}
+    {%- if data.extra.footer_links is defined -%}
+      {%- set_global links = [...links, ...data.extra.footer_links] -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- for link in links -%}
+    {%- if link.sitemap is defined and link.sitemap and link.path is defined and link.path -%}
+      {# Only local paths: reject protocol-relative URLs and URL schemes. #}
+      {%- if not link.path is starting_with(pat="//") and not ":" in link.path -%}
+        {%- set trailing_slash = link.path is ending_with(pat="/") -%}
+        {%- set url = get_url(path=link.path, trailing_slash=trailing_slash) -%}
+        {%- if url not in seen %}
+    <url>
+        <loc>{{ url | escape_html | safe }}</loc>
+    </url>
+          {%- set_global seen = [...seen, url] -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor %}
+</urlset>

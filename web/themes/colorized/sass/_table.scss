@@ -1,0 +1,28 @@
+table {
+  border-radius: 8px;
+  border-collapse: collapse;
+  background-color: color-mix(in srgb, var(--text) 5%, transparent);
+  width: 100%;
+  overflow: hidden;
+
+  tr {
+    &:nth-child(even) {
+      background-color: color-mix(in srgb, var(--text) 5%, transparent);
+    }
+
+    th,
+    td {
+      padding: 0.5rem 1rem;
+    }
+
+    th {
+      background-color: color-mix(in srgb, var(--text) 10%, transparent);
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+}
+
+.table-scroll {
+  overflow-x: auto;
+}

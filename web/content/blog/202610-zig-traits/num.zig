@@ -157,3 +157,37 @@ fn getTrait(Trait: type, Impl: type) ?Trait {
         return null;
     }
 }
+
+fn Foldable(T: type) type {
+    return struct {
+        empty: T,
+        combine: fn (T, T) T,
+
+        fn fold(self: @This(), xs: []const T) T {
+            var accum = self.empty;
+            for (xs) |x| accum = self.combine(accum, x);
+            return accum;
+        }
+    };
+}
+
+
+const sum_trait = impl(Foldable(i32), struct {
+    pub const empty = 0;
+    fn combine(x: T, y: T) T {
+        return x + y;
+    }
+});
+
+const product_trait = impl(Foldable(i32), struct {
+    pub const empty = 1;
+    fn combine(x: T, y: T) T {
+        return x * y;
+    }
+});
+
+export fn run(buf: [*c]i32, n: usize) i32 {
+    const sum = sum_trait.fold(buf[0..n]);
+    const product = sum_trait.fold(buf[0..n]);
+    return sum + product;
+}

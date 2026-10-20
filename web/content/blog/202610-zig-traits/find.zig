@@ -7,7 +7,7 @@ fn Index(T: type, K: type, V: type) type {
 
 /// if a collection can be indexed by contiguous numbers, we can find the index
 /// of a value by scanning through indices.
-fn scan(
+fn find(
     collection: anytype,
     search_value: anytype,
     index_trait: Index(@TypeOf(collection), usize, @TypeOf(search_value)),
@@ -36,6 +36,6 @@ pub fn main() u8 {
     const str: []const u8 = "the quick brown fox";
     const char: u8 = 'b';
     const trait = sliceIndex(u8);
-    const idx = scan(str, char, trait);
+    const idx = find(str, char, trait);
     return @intCast(idx.?);
 }

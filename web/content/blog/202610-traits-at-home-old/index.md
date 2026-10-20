@@ -502,16 +502,15 @@ fn run() {
 That's pretty neat, but let me tell you from experience: wrapping your
 functions in anonymous structs like that gets tedious fast.  Let's write a
 quick utility function called `impl` that converts declarations to trait
-fields.  It just iterates through the fields of `Sig` at comptime, and blindly
-assigns any matching declarations from `M`.
+fields.  It just iterates through the fields of `Trait` at comptime, and blindly
+assigns any matching declarations from `Impl`.
 
 ```zig
-fn impl(comptime Sig: type, comptime M: type) Sig {
+pub fn impl(comptime Trait: type, comptime Impl: type) Trait {
     comptime {
-        var result: Sig = undefined;
-        for (@typeInfo(Sig).@"struct".field_names) |field_name| {
-            if (!@hasDecl(M, field_name)) @compileError(@typeName(M) ++ " is missing `" ++ field_name ++ "`");
-            @field(result, field_name) = @field(M, field_name);
+        var result: Trait = undefined;
+        for (@typeInfo(Trait).@"struct".field_names) |field_name| {
+            @field(result, field_name) = @field(Impl, field_name);
         }
         return result;
     }

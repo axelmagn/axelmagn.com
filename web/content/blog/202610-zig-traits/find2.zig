@@ -14,7 +14,7 @@ fn Equal(T: type) type {
 
 /// if a collection can be indexed by contiguous numbers, we can find the index
 /// of a value by scanning through indices.
-fn scan(
+fn find(
     collection: anytype,
     search_value: anytype,
     index_trait: Index(@TypeOf(collection), usize, @TypeOf(search_value)),
@@ -52,6 +52,6 @@ fn numEqual(T: type) Equal(T) {
 pub fn main() u8 {
     const str: []const u8 = "the quick brown fox";
     const char: u8 = 'b';
-    const idx = scan(str, char, sliceIndex(u8), numEqual(u8));
+    const idx = find(str, char, sliceIndex(u8), numEqual(u8));
     return @intCast(idx.?);
 }

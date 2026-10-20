@@ -48,66 +48,101 @@ typing, because any interface violations will be caught at compile time rather
 than runtime, but the caller and callee must still be careful to document and
 follow the contract of what types may be passed.
 
-This has worked fine so far.
-
 If you are coming from another strongly typed language, you would be forgiven
 for finding this state of affairs rather simplistic. This is perhaps by design
 -- Zig aims to be simple.  However if you have grown accustomed to Rust's traits or
-Haskell typeclasses, there appears to be no ready equivalent in Zig. I will
-argue that, with a little adaptation, Rust's traits and Ocaml's modules can in
-fact be expressed perfectly elegantly in Zig userland.
+Haskell typeclasses, there appears to be no ready equivalent in Zig. 
 
-I would like to put forward a new **convention** for defining type contracts as
-**Traits** in Zig.  It doesn't require any libraries or machinery - in fact if
-fits remarkably well into vanilla Zig.  It is inspired by the functional
-programming world in general, and OCaml in particular.
+I will argue that, with a little adaptation, it is perfectly possible to
+express similar abstractions over types in Zig userland. I would propose a new
+**convention** for defining compile-time type contracts as **Traits** in Zig.
+It doesn't require any libraries or machinery - in fact if fits remarkably well
+into vanilla Zig.  It is inspired by the functional programming world in
+general, and OCaml in particular.
+
+> **Definition:** a Trait is a compile-time struct which contains related
+> functions over a given type.
 
 So as not to bury the lead, let me begin with a brief example.
 
 ```zig
-
-/// Trait for numeric types, containing arithmetic functions.
-fn Num(T: type) type {
+/// a trait that declares T to be iterable over Elem
+pub fn Iter(T: type, Elem: type) type {
     return struct {
-        add: fn(T, T) T,
-        mul: fn(T, T) T,
-        // ... (sub, div)
-    }
+        next: fn (T) ?Elem,
+    };
 }
 
-const Complex = struct {
-    real: f32,
-    imag: f32,
+/// a trait that declares T to have an equality function
+pub fn Eq(T: type) type {
+    return struct {
+        eq: fn (T, T) bool,
+    };
+}
 
-    const num: Num(Complex) = .{ .add = add, .mul = mul };
-
-    fn add(lhs: Complex, rhs: Complex) Complex {
-        return .{ .real = lhs.real + rhs.real, .imag = lhs.imag + rhs.imag };
+/// find the index of an element in a collection
+pub fn find(
+    collection: anytype,
+    item: anytype,
+    iter: Iter(@TypeOf(arr), @TypeOf(item)),
+    eq: Eq(@TypeOf(item)),
+) ?usize {
+    var idx: usize = 0;
+    while (iter.next(arr)) |elem| : (idx += 1) {
+        if (eq.eq(item, elem)) return idx;
     }
-
-    fn mul(lhs: Complex, rhs: Complex) Complex {
-        const a = lhs.real;
-        const b = lhs.imag;
-        const c = rhs.real;
-        const d = rhs.imag;
-        return .{ .real = a * c - b * d, .imag = a * d + b * c };
-    }
-};
-
-const Rational = struct {
-    numerator: i32,
-    denominator: u32,
-
-    fn add(lhs: Rational, rhs: Rational) Rational {
-        var numerator = lhs.numerator * rhs.denominator + rhs.numerator * lhs.denominator;
-        var denominator = rhs.denominator * lhs.denominator;
-        // simplify
-        while ()
-    }
-};
-
-
+    return null;
+}
 ```
+
+To use the find function, a developer simply implements the required traits for
+the type they want to use.
+
+```zig
+const CaseInsensitiveFindStr = struct {
+    index: usize,
+    strings: std.ArrayList([]const u8),
+
+    const Self = @This();
+
+    const traits = struct {
+        const iter: Iter(*Self, []const u8) = .{ .next = next };
+        const eq: Eq([]const u8) = .{ .eq = case_insensitive_eq };
+    };
+
+    pub fn find_str(self: *Self, search_str: []const u8) ?usize {
+        return find(self, search_str, .{ .iter = traits.iter, .eq = traits.eq });
+    }
+
+    fn next(self: *Self) ?[]const u8 {
+        if (self.index < self.strings.items.len) {
+            defer self.index += 1;
+            return self.strings.items[self.index];
+        }
+        return null;
+    }
+
+    fn case_insensitive_eq(lhs: []const u8, rhs: []const u8) bool {
+        const toLower = std.ascii.toLower;
+        if (lhs.len != rhs.len) return false;
+        for (lhs, rhs) |lchar, rchar| {
+            if (toLower(lchar) != toLower(rchar)) return false;
+        }
+        return true;
+    }
+};
+```
+
+If this looks a bit verbose, don't worry.  This article will talk later about
+ways we can make traits more ergonomic.  The important thing is that they are a
+*userland convention* for defining interfaces and implementations that can be
+resolved an monomorphised at comptime.
+
+Traits are just bags of functions and types that tell the receiving function
+how to execute subtasks that it's not responsible for defining.  They behave a
+lot like vtables, except that they are evaluated at comptime rather than
+runtime.
+
 
 [^figuratively]: figuratively
 
@@ -135,8 +170,41 @@ Design](https://vimeo.com/649009599) by Andrew Kelley
 Good](https://www.scottredig.com/blog/bonkers_comptime/) by Scott Redit
 
 
-## Conventional Polymorphism
+## Conventional Polymorphism and Traits
+
+To provide a tour through polymorhpism, let's start with a common motivating
+example: arithmetic operations.  I've seen a few complaints over the years
+about how awkward is it to do math in Zig over user-defined types.  In its
+pursuit of explicit control flow, Zig has eschewed operator overloading.
+
+Let's imagine we have some user-defined types like `Rational` and `Complex`,
+and we want to define their basic arithmentic operations.  We would probably
+end up with something like the following.
+
+```zig
+const Rational = struct {
+    numerator: i32,
+    denominator: i32,
+
+    fn add(lhs: Rational, rhs: Rational) Rational {...}
+    fn sub(lhs: Rational, rhs: Rational) Rational {...}
+    fn mul(lhs: Rational, rhs: Rational) Rational {...}
+    fn div(lhs: Rational, rhs: Rational) Rational {...}
+};
+
+const Complex = struct {
+    real: f32,
+    imaginary: f32,
+
+    fn add(lhs: Complex, rhs: Complex) Complex {...}
+    fn sub(lhs: Complex, rhs: Complex) Complex {...}
+    fn mul(lhs: Complex, rhs: Complex) Complex {...}
+    fn div(lhs: Complex, rhs: Complex) Complex {...}
+};
+```
 
 ### Comptime Duck Typing
+
+Both user-defined types have pretty similar method signatures, 
 
 ### Interfaces

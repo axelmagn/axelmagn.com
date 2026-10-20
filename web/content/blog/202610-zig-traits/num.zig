@@ -2,9 +2,38 @@
 fn Num(T: type) type {
     return struct {
         add: fn (T, T) T,
+        sub: fn (T, T) T,
         mul: fn (T, T) T,
-        // ... (sub, div)
+        div: fn (T, T) T,
     };
+}
+
+fn default_num(T: type) Num(T) {
+    const inner = struct {
+        fn add(lhs: T, rhs: T) T {
+            return lhs + rhs;
+        }
+        fn sub(lhs: T, rhs: T) T {
+            return lhs - rhs;
+        }
+        fn mul(lhs: T, rhs: T) T {
+            return lhs * rhs;
+        }
+    };
+    const div = switch (@typeInfo(T)) {
+        .int, .comptime_int => struct {
+            fn div(lhs: T, rhs: T) T {
+                return @divTrunc(lhs, rhs);
+            }
+        }.div,
+        .float, .comptime_float => struct {
+            fn div(lhs: T, rhs: T) T {
+                return lhs / rhs;
+            }
+        }.div,
+        else => @compileError("unsupported type: " ++ @typeName(T)),
+    };
+    return .{ .add = inner.add, .sub = inner.sub, .mul = inner.mul, .div = div };
 }
 
 const Complex = struct {
@@ -75,4 +104,56 @@ pub fn main() void {
     std.debug.print("{any}^2 = {any}\n", .{ a, square(Complex, a, Complex.num) });
     const b = Rational{ .numerator = 2, .denominator = 3 };
     std.debug.print("{any}^2 = {any}\n", .{ b, square_any(b, Rational.num) });
+}
+
+fn mobius(
+    comptime T: type,
+    comptime add: fn (T, T) T,
+    comptime mul: fn (T, T) T,
+    comptime div: fn (T, T) T,
+    x: T,
+    a: T,
+    b: T,
+    c: T,
+    d: T,
+) T {
+    const numerator = add(mul(a, x), b);
+    const denominator = add(mul(c, x), d);
+    return div(numerator, denominator);
+}
+
+test {
+    mobius(Complex, Complex.add, Complex.mul, Complex.div, x, a, b, c, d);
+    mobius(Real, Real.add, Real.mul, Real.div, x, a, b, c, d);
+}
+
+fn getTrait(Trait: type, Impl: type) ?Trait {
+    comptime {
+        // first, try to find the trait declared explicitly as a member
+        for (@typeInfo(Impl).@"struct".decl_names) |decl_name| {
+            if (@TypeOf(@field(Impl, decl_name)) == Trait) {
+                return @field(Impl, decl_name);
+            }
+        }
+        // if that fails, try to construct the trait from declarations
+        var result: Trait = undefined;
+        var success = true;
+        for (
+            @typeInfo(Trait).@"struct".field_names,
+            @typeInfo(Trait).@"struct".field_types,
+        ) |field_name, field_type| {
+            if (!@hasDecl(Impl, field_name) or
+                field_type != @TypeOf(@field(Impl, field_name)))
+            {
+                success = false;
+                break;
+            }
+            @field(result, field_name) = @field(Impl, field_name);
+        }
+        if (success) {
+            return result;
+        }
+
+        return null;
+    }
 }

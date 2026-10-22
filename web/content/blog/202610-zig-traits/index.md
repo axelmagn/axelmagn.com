@@ -488,7 +488,6 @@ that rely on `getTrait` to extract traits from the types they pass.
 fn duckMobius(T: type) fn(T, T, T, T) T {
     comptime {
         const num = getTrait(Num(T), T);
-        if (num == null) @compileError("could not derive Num(T) from type " ++ @typeName(T));
         return makeMobius(T, num.?);
     }
 }
@@ -504,7 +503,7 @@ by the compiler. This can feel very convenient, but it violates Zig's principle
 of explicit control flow. Rust and Haskell can require a fair bit of hunting for
 where a trait is defined, especially when something's wrong and the LSP isn't
 resolving it properly. It can also be a contributor to long compile times.
-Resolving a generic trait in these languages is often equivalent to running a
+Resolving a generic trait in these languages is often equivalent to evaluating a
 proof, and that can take time.
 
 Ocaml modules, however, work quite a bit like Zig traits: modules are

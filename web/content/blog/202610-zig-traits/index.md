@@ -84,17 +84,13 @@ fn Reducer(T: type) type {
 /// i32 forms a sum reducer under 0 and addition
 const sum_trait = impl(Reducer(i32), struct {
     pub const empty = 0;
-    fn combine(x: T, y: T) T {
-        return x + y;
-    }
+    pub fn combine(x: T, y: T) T { return x + y; }
 });
 
 /// i32 forms a product reducer under 1 and multiplication
 const product_trait = impl(Reducer(i32), struct {
     pub const empty = 1;
-    fn combine(x: T, y: T) T {
-        return x * y;
-    }
+    pub fn combine(x: T, y: T) T { return x * y; }
 });
 
 export fn run(buf: [*c]i32, n: usize) i32 {

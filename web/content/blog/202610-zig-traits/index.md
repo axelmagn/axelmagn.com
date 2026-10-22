@@ -677,6 +677,7 @@ container could be a slice or a hash table - we don't care.  For this, I use
 `Index`.
 
 ```zig
+/// T forms an index over Key and Value
 fn Index(T: type, Key: type, Value: type) type {
     return struct {
         get: fn(T, Key) ?Value,

@@ -61,7 +61,7 @@ into vanilla Zig. It is inspired by the functional programming world in general,
 and OCaml in particular.
 
 > **Definition:** a Trait is a compile-time struct which contains related
-> functions over a given type.
+> functions over a given type. [^ocaml-inspired]
 
 So as not to bury the lead, let me begin with a brief example of how we might
 define a trait for folding (reducing) on a type.
@@ -142,6 +142,9 @@ like vtables, except that they are evaluated at comptime rather than runtime.
     by Scott Redit
 
 [^so-good]: ![Feels Good](so_good.png)
+
+[^ocaml-inspired]: "Traits" are directly inspired from OCaml modules, but the
+    term "module" already refers to something else in Zig.
 
 ## Conventional Polymorphism vs Traits
 

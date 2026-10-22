@@ -49,7 +49,7 @@ runtime, but the caller and callee must still be careful to document and follow
 the contract of what types may be passed.
 
 If you are coming from another strongly typed language, you would be forgiven
-for finding this state of affairs rather simplistic. This is perhaps by design
+for finding this arrangement rather simplistic. This is perhaps by design
 -- Zig aims to be simple. However if you have grown accustomed to Rust's traits
 or Haskell typeclasses, there appears to be no ready equivalent in Zig.
 

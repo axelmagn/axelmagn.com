@@ -488,7 +488,7 @@ that rely on `getTrait` to extract traits from the types they pass.
 fn duckMobius(T: type) fn(T, T, T, T) T {
     comptime {
         const num = getTrait(Num(T), T);
-        return makeMobius(T, num.?);
+        return makeMobius(T, num);
     }
 }
 ```

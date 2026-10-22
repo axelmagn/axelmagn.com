@@ -702,9 +702,7 @@ fn Iterator(T: type, Elem: type) type {
 /// T can return an Iter iterator over Elem elements
 fn Iterable(T: Type, Elem: type, Iter: type) type {
     return struct {
-
         iter: fn(T) IterPair,
-
         pub const IterPair = struct {impl: Iter, trait: Iterator(Iter, Elem)};
     };
 }

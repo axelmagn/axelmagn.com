@@ -2,7 +2,7 @@
 title = "We have Traits at Home"
 date = 2026-10-03
 authors = ["Axel Magnuson"]
-draft = true
+draft = false
 
 [taxonomies]
 tags = ["zig", "traits", "polymorphism", "abstraction"]

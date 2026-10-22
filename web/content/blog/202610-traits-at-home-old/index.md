@@ -2,6 +2,7 @@
 title = "We Have Traits at Home (Draft)"
 date = 2026-10-03
 authors = ["Axel Magnuson"]
+draft = true
 
 [taxonomies]
 tags = ["zig", "traits", "functors"]

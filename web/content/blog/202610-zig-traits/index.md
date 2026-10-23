@@ -93,7 +93,7 @@ const product_trait = impl(Reducer(i32), struct {
     pub fn combine(x: T, y: T) T { return x * y; }
 });
 
-export fn run(buf: [*c]i32, n: usize) i32 {
+export fn run(buf: [*]i32, n: usize) i32 {
     const sum = sum_trait.reduce(buf[0..n]);
     const product = product_trait.reduce(buf[0..n]);
     return sum + product;
@@ -137,7 +137,7 @@ like vtables, except that they are evaluated at comptime rather than runtime.
 
 [^redig2025]:
     [Zig Comptime is Bonkers Good](https://www.scottredig.com/blog/bonkers_comptime/)
-    by Scott Redit
+    by Scott Redig
 
 [^so-good]: ![Feels Good](so_good.png)
 

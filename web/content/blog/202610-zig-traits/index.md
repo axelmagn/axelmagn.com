@@ -8,10 +8,10 @@ draft = false
 tags = ["zig", "traits", "polymorphism", "abstraction"]
 +++
 
-I have had more time recently to write code in Zig, and it has been good for my
-soul. I wanted to share some insights I have arrived at regarding abstractions
-in Zig, including some techniques that I have found useful but not seen employed
-more broadly.
+I have had more time recently to write code in Zig[^zig-0.17], and it has been
+good for my soul. I wanted to share some insights I have arrived at regarding
+abstractions in Zig, including some techniques that I have found useful but not
+seen employed more broadly.
 
 Considerable[^seguin2023] ink[^figuratively] has[^wong2025] been[^mckay2025]
 spilled[^cypert2026] on Zig Interfaces, and justifiably so. While not a language
@@ -107,6 +107,8 @@ loop.
 Traits are just bags of functions and types that tell the receiving function how
 to execute subtasks that it's not responsible for defining. They behave a lot
 like vtables, except that they are evaluated at comptime rather than runtime.
+
+[^zig-0.17]: Zig 0.17 at time of writing.
 
 [^figuratively]: figuratively
 

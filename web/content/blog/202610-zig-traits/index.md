@@ -1,5 +1,5 @@
 +++
-title = "We have Traits at Home"
+title = "We Have Traits at Home"
 date = 2026-10-03
 authors = ["Axel Magnuson"]
 draft = false
